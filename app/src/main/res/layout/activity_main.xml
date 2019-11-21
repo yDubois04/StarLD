@@ -3,16 +3,45 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnCount="1"
+        android:rowCount="4"
+        android:stretchColumns="0,1,2,3">
+
+    <TableRow
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/textViewDate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Date"/>
+
+        <TextView
+            android:id="@+id/textViewHour"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Heure"/>
+
+        <Spinner
+            android:id="@+id/boutonModulo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <Button
+            android:id="@+id/boutonDiviser"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Valider" />
+    </TableRow>
+
+    </TableLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
