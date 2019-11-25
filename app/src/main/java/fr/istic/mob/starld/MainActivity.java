@@ -1,6 +1,13 @@
 package fr.istic.mob.starld;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -19,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,9 +45,19 @@ public class MainActivity extends AppCompatActivity {
         calendar = GregorianCalendar.getInstance();
         this.initializeTextView();
 
+        //Service
         //intent = new Intent(getApplicationContext(), ServiceStar.class);
-
         //startService(intent);
+
+        Constraints constraints = new Constraints.Builder().build();
+
+        PeriodicWorkRequest downloadRequest =
+                new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
+                        .setConstraints(constraints)
+                        .build();
+
+        WorkManager.getInstance(getApplicationContext())
+                .enqueue(downloadRequest);
     }
 
     private void initializeTextView () {
