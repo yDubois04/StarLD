@@ -1,22 +1,8 @@
 package fr.istic.mob.starld;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationBuilderWithBuilderAccessor;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -25,16 +11,31 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class DownloadWorker extends Worker {
 
-    String lastIdJson = "";
-    String CHANNEL_ID = "Channel";
-    int idNotif  = 5;
+    String finValidite = "";
+    String debutValidite = "";
+    String url = "";
+
+    String lastJSONString = "";
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    Date finValiditeDate;
+    Date debutValiditeDate;
 
     public DownloadWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
@@ -42,44 +43,95 @@ public class DownloadWorker extends Worker {
 
     @Override
     public Result doWork() {
-        /*
-         * Go check the url to see if an update has occured
-         */
-        String jsonResult = getJsonFromUrl();
+        //Get current date
+        Date date = new Date();
 
-        if(jsonResult.equals("bfj")){
+        String jsonResult = getJsonFromUrl();
+        String lastJSONString = getStringSaved("JSONResult.txt");
+
+        if(!jsonResult.equals(lastJSONString)){
             try {
                 JSONObject jsonObjectResult = new JSONObject(jsonResult);
-                JSONArray data = jsonObjectResult.getJSONArray("records");
-                JSONObject idTable = data.getJSONObject(0);
+                JSONArray arr = jsonObjectResult.getJSONArray("records");
+                JSONObject firstFields = arr.getJSONObject(0).getJSONObject("fields");
+                finValidite = firstFields.getString("finvalidite");
+                debutValidite = firstFields.getString("debutvalidite");
 
-                lastIdJson = idTable.getString("recordid");
+                try {
+                    finValiditeDate = dateFormat.parse(finValidite);
+                    debutValiditeDate = dateFormat.parse(debutValidite);
+                }
+                catch(ParseException e){
+                    e.printStackTrace();
+                }
+
+                //If first object in records is still valid, take the url from it
+                if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0){
+                    url = firstFields.getString("url");
+                    saveStringInMemory(jsonResult);
+                }
+                else{
+                    JSONObject secondFields = arr.getJSONObject(1).getJSONObject("fields");
+                    finValidite = secondFields.getString("finvalidite");
+                    debutValidite = secondFields.getString("debutvalidite");
+
+                    try {
+                        finValiditeDate = dateFormat.parse(finValidite);
+                        debutValiditeDate = dateFormat.parse(debutValidite);
+                    }
+                    catch(ParseException e){
+                        e.printStackTrace();
+                    }
+
+                    //if the second object in records is still valid, take the url from it
+                    if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0) {
+                        url = secondFields.getString("url");
+
+                        saveStringInMemory(jsonResult);
+                    }
+
+                    //If none are valid, we keep the old one
+                }
             }
             catch(JSONException e){
-                System.out.println("Erreur "+e);
+                System.out.println("Could not parse malformed JSON: \"" + jsonResult + "\"");
             }
         }
-        else {
-            createNotification ();
-        }
+
         // Indicate whether the task finished successfully with the Result
         return Result.success();
     }
 
-    private void createNotification () {
-       Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,intent,0);
+    private void saveStringInMemory (String JSONToSave) {
+        FileOutputStream outputStream = null;
+        ObjectOutputStream objectOutputStream = null;
+        String nameFile = "JSONResult.txt";
+        try {
+            outputStream = getApplicationContext().openFileOutput(nameFile, MODE_PRIVATE);
+            objectOutputStream = new ObjectOutputStream(outputStream);
+            objectOutputStream.writeObject(JSONToSave);
+            outputStream.flush();
+            outputStream.close();
+            objectOutputStream.flush();
+            objectOutputStream.close();
+        } catch (IOException e) {
+            System.out.println("Erreur ! : " + e);
+        }
+    }
 
+    private String getStringSaved(String fileName){
+        String result = "";
 
-        NotificationCompat.Builder notif = new NotificationCompat.Builder(getApplicationContext(), "Notification")
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentTitle("Nouvelles informations à télécharger")
-                .setContentText("Cliquez sur la notification pour télécharger les nouvelles données")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent);
-        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(idNotif++,notif.build());
+        try {
+            FileInputStream input = getApplicationContext().openFileInput(fileName);
+            ObjectInputStream inputStream = new ObjectInputStream(input);
+            result = (String) inputStream.readObject();
+        }
+        catch (Exception e) {
+            System.out.println("Erreur ! : " +e);
+        }
+
+        return result;
     }
 
     private String getJsonFromUrl(){
