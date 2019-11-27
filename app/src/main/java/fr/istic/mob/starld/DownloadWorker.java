@@ -1,25 +1,41 @@
 package fr.istic.mob.starld;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class DownloadWorker extends Worker {
 
-    String lastjsonResult = "";
+    String finValidite = "";
+    String debutValidite = "";
+    String url = "";
+
+    String lastJSONString = "";
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    Date finValiditeDate;
+    Date debutValiditeDate;
 
     public DownloadWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
@@ -27,26 +43,95 @@ public class DownloadWorker extends Worker {
 
     @Override
     public Result doWork() {
-        /*
-         * Go check the url to see if an update has occured
-         */
-        String jsonResult = getJsonFromUrl();
+        //Get current date
+        Date date = new Date();
 
-        //if(!jsonResult.equals(lastjsonResult)){
+        String jsonResult = getJsonFromUrl();
+        String lastJSONString = getStringSaved("JSONResult.txt");
+
+        if(!jsonResult.equals(lastJSONString)){
             try {
                 JSONObject jsonObjectResult = new JSONObject(jsonResult);
+                JSONArray arr = jsonObjectResult.getJSONArray("records");
+                JSONObject firstFields = arr.getJSONObject(0).getJSONObject("fields");
+                finValidite = firstFields.getString("finvalidite");
+                debutValidite = firstFields.getString("debutvalidite");
 
-                Log.d("My App", jsonObjectResult.toString());
+                try {
+                    finValiditeDate = dateFormat.parse(finValidite);
+                    debutValiditeDate = dateFormat.parse(debutValidite);
+                }
+                catch(ParseException e){
+                    e.printStackTrace();
+                }
+
+                //If first object in records is still valid, take the url from it
+                if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0){
+                    url = firstFields.getString("url");
+                    saveStringInMemory(jsonResult);
+                }
+                else{
+                    JSONObject secondFields = arr.getJSONObject(1).getJSONObject("fields");
+                    finValidite = secondFields.getString("finvalidite");
+                    debutValidite = secondFields.getString("debutvalidite");
+
+                    try {
+                        finValiditeDate = dateFormat.parse(finValidite);
+                        debutValiditeDate = dateFormat.parse(debutValidite);
+                    }
+                    catch(ParseException e){
+                        e.printStackTrace();
+                    }
+
+                    //if the second object in records is still valid, take the url from it
+                    if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0) {
+                        url = secondFields.getString("url");
+
+                        saveStringInMemory(jsonResult);
+                    }
+
+                    //If none are valid, we keep the old one
+                }
             }
             catch(JSONException e){
-                Log.e("My App", "Could not parse malformed JSON: \"" + jsonResult + "\"");
+                System.out.println("Could not parse malformed JSON: \"" + jsonResult + "\"");
             }
-        //}
-
-        lastjsonResult = jsonResult;
+        }
 
         // Indicate whether the task finished successfully with the Result
         return Result.success();
+    }
+
+    private void saveStringInMemory (String JSONToSave) {
+        FileOutputStream outputStream = null;
+        ObjectOutputStream objectOutputStream = null;
+        String nameFile = "JSONResult.txt";
+        try {
+            outputStream = getApplicationContext().openFileOutput(nameFile, MODE_PRIVATE);
+            objectOutputStream = new ObjectOutputStream(outputStream);
+            objectOutputStream.writeObject(JSONToSave);
+            outputStream.flush();
+            outputStream.close();
+            objectOutputStream.flush();
+            objectOutputStream.close();
+        } catch (IOException e) {
+            System.out.println("Erreur ! : " + e);
+        }
+    }
+
+    private String getStringSaved(String fileName){
+        String result = "";
+
+        try {
+            FileInputStream input = getApplicationContext().openFileInput(fileName);
+            ObjectInputStream inputStream = new ObjectInputStream(input);
+            result = (String) inputStream.readObject();
+        }
+        catch (Exception e) {
+            System.out.println("Erreur ! : " +e);
+        }
+
+        return result;
     }
 
     private String getJsonFromUrl(){
