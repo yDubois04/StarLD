@@ -31,12 +31,12 @@
             android:hint="Heure"/>
 
         <Spinner
-            android:id="@+id/boutonModulo"
+            android:id="@+id/listBus"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
         <Button
-            android:id="@+id/boutonDiviser"
+            android:id="@+id/buttonValidate"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="Valider" />

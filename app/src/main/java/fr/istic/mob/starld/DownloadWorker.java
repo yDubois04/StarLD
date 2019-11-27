@@ -1,13 +1,26 @@
 package fr.istic.mob.starld;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationBuilderWithBuilderAccessor;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,7 +32,9 @@ import java.net.URL;
 
 public class DownloadWorker extends Worker {
 
-    String lastjsonResult = "";
+    String lastIdJson = "";
+    String CHANNEL_ID = "Channel";
+    int idNotif  = 5;
 
     public DownloadWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
@@ -32,21 +47,39 @@ public class DownloadWorker extends Worker {
          */
         String jsonResult = getJsonFromUrl();
 
-        //if(!jsonResult.equals(lastjsonResult)){
+        if(jsonResult.equals("bfj")){
             try {
                 JSONObject jsonObjectResult = new JSONObject(jsonResult);
+                JSONArray data = jsonObjectResult.getJSONArray("records");
+                JSONObject idTable = data.getJSONObject(0);
 
-                Log.d("My App", jsonObjectResult.toString());
+                lastIdJson = idTable.getString("recordid");
             }
             catch(JSONException e){
-                Log.e("My App", "Could not parse malformed JSON: \"" + jsonResult + "\"");
+                System.out.println("Erreur "+e);
             }
-        //}
-
-        lastjsonResult = jsonResult;
-
+        }
+        else {
+            createNotification ();
+        }
         // Indicate whether the task finished successfully with the Result
         return Result.success();
+    }
+
+    private void createNotification () {
+       Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,intent,0);
+
+
+        NotificationCompat.Builder notif = new NotificationCompat.Builder(getApplicationContext(), "Notification")
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle("Nouvelles informations à télécharger")
+                .setContentText("Cliquez sur la notification pour télécharger les nouvelles données")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent);
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(idNotif++,notif.build());
     }
 
     private String getJsonFromUrl(){
