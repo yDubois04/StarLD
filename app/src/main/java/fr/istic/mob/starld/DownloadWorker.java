@@ -68,7 +68,7 @@ public class DownloadWorker extends Worker {
                 //If first object in records is still valid, take the url from it
                 if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0){
                     url = firstFields.getString("url");
-                    saveStringInMemory(jsonResult);
+                    saveStringInMemory("JSONResult.txt", jsonResult);
                 }
                 else{
                     JSONObject secondFields = arr.getJSONObject(1).getJSONObject("fields");
@@ -87,7 +87,7 @@ public class DownloadWorker extends Worker {
                     if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0) {
                         url = secondFields.getString("url");
 
-                        saveStringInMemory(jsonResult);
+                        saveStringInMemory("JSONResult.txt", jsonResult);
                     }
 
                     //If none are valid, we keep the old one
@@ -98,14 +98,21 @@ public class DownloadWorker extends Worker {
             }
         }
 
+        if(!url.equals("")){
+            saveStringInMemory("currentURL.txt", url);
+        }
+
+        System.out.println("URL ::::: " + url);
+        System.out.println("CurrentURL ::::: " + getStringSaved("currentURL.txt"));
+
         // Indicate whether the task finished successfully with the Result
         return Result.success();
     }
 
-    private void saveStringInMemory (String JSONToSave) {
+    private void saveStringInMemory (String fileName, String JSONToSave) {
         FileOutputStream outputStream = null;
         ObjectOutputStream objectOutputStream = null;
-        String nameFile = "JSONResult.txt";
+        String nameFile = fileName;
         try {
             outputStream = getApplicationContext().openFileOutput(nameFile, MODE_PRIVATE);
             objectOutputStream = new ObjectOutputStream(outputStream);

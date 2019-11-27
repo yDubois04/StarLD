@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
-    Intent intent;
     TextView chooseHour;
     TextView chooseDate;
     Calendar calendar;
@@ -44,10 +43,6 @@ public class MainActivity extends AppCompatActivity {
         chooseDate = findViewById(R.id.textViewDate);
         calendar = GregorianCalendar.getInstance();
         this.initializeTextView();
-
-        //Service
-        //intent = new Intent(getApplicationContext(), ServiceStar.class);
-        //startService(intent);
 
         Constraints constraints = new Constraints.Builder().build();
 
