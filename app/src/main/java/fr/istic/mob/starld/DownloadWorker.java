@@ -31,8 +31,6 @@ public class DownloadWorker extends Worker {
     String debutValidite = "";
     String url = "";
 
-    String lastJSONString = "";
-
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     Date finValiditeDate;
     Date debutValiditeDate;

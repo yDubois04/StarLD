@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     TextView chooseDate;
     Calendar calendar;
     Button validate;
-    long downloadId;
     int idNotif = 0;
 
     @Override
@@ -49,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         this.initializeTextView();
 
         Constraints constraints = new Constraints.Builder().build();
+
+        saveFile();
 
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
@@ -96,8 +97,6 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationManagerCompat notification = NotificationManagerCompat.from(this);
         notification.notify(idNotif, builder.build());
-
-
     }
 
     private long saveFile () {
