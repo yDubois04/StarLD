@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">StarLD</string>
+    <string name="notif_title">Datas to download</string>
+    <string name="notif_content">Clock to download new datas</string>
+    <string name="notif_dowload_title">Download datas</string>
+</resources>
