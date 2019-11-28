@@ -1,8 +1,17 @@
 package fr.istic.mob.starld;
 
+import android.app.DownloadManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -11,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,8 +32,11 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class DownloadWorker extends Worker {
 
@@ -67,6 +80,7 @@ public class DownloadWorker extends Worker {
                 if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0){
                     url = firstFields.getString("url");
                     saveStringInMemory("JSONResult.txt", jsonResult);
+                    createNotification(url);
                 }
                 else{
                     JSONObject secondFields = arr.getJSONObject(1).getJSONObject("fields");
@@ -86,6 +100,7 @@ public class DownloadWorker extends Worker {
                         url = secondFields.getString("url");
 
                         saveStringInMemory("JSONResult.txt", jsonResult);
+                        createNotification(url);
                     }
 
                     //If none are valid, we keep the old one
@@ -179,5 +194,28 @@ public class DownloadWorker extends Worker {
 
             return responseJSON;
         }
+    }
+    
+    private void createNotification (String url) {
+
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("url", url);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "Notif")
+                .setSmallIcon(R.drawable.icon_notif)
+                .setContentTitle(getApplicationContext().getString(R.string.notif_title))
+                .setContentText(getApplicationContext().getString(R.string.notif_content))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("notification_download", "Dowload BD infos", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(channel);
+            builder.setChannelId("notification_download");
+        }
+
+        NotificationManagerCompat notification = NotificationManagerCompat.from(getApplicationContext());
+        notification.notify(1, builder.build());
     }
 }

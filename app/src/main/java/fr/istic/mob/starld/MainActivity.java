@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
     TextView chooseDate;
     Calendar calendar;
     Button validate;
-    int idNotif = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +49,7 @@ public class MainActivity extends AppCompatActivity {
         validate = findViewById(R.id.buttonValidate);
         this.initializeTextView();
 
-        this.createNotification();
-
-        /*Constraints constraints = new Constraints.Builder().build();
-
-        saveFile();
+        Constraints constraints = new Constraints.Builder().build();
 
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
@@ -62,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                         .build();
 
         WorkManager.getInstance(getApplicationContext())
-                .enqueue(downloadRequest);*/
+                .enqueue(downloadRequest);
     }
 
     private void initializeTextView () {
@@ -93,26 +88,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void createNotification () {
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "Notif")
-                .setSmallIcon(R.drawable.icon_notif)
-                .setContentTitle(getString(R.string.notif_title))
-                .setContentText(getString(R.string.notif_content))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("notification_download", "Dowload BD infos", NotificationManager.IMPORTANCE_DEFAULT);
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            manager.createNotificationChannel(channel);
-            builder.setChannelId("notification_download");
-        }
-
-        NotificationManagerCompat notification = NotificationManagerCompat.from(this);
-        notification.notify(idNotif, builder.build());
-    }
-
     private long saveFile () {
 
         long download = 0;
@@ -121,10 +96,10 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = Uri.parse(url);
 
         DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setTitle(getString(R.string.notif_dowload_title));
+        request.setTitle(getApplicationContext().getString(R.string.notif_dowload_title));
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
         request.setMimeType("zip");
-        request.setDestinationInExternalFilesDir(getApplicationContext(),Environment.DIRECTORY_DOWNLOADS,"Test.zip");
+        request.setDestinationInExternalFilesDir(getApplicationContext(), Environment.DIRECTORY_DOWNLOADS,"Test.zip");
 
 
         DownloadManager manager = (DownloadManager)getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
@@ -137,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         byte [] buffer = new byte [1024];
 
         try {
-            File dest = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            File dest = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
             File file = new File(dest, "Infos.zip");
             ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file));
             ZipEntry entry = zipInputStream.getNextEntry();
