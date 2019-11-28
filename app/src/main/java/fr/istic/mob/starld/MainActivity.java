@@ -50,17 +50,26 @@ public class MainActivity extends AppCompatActivity {
         validate = findViewById(R.id.buttonValidate);
         this.initializeTextView();
 
-        this.createNotification();
+      /* Bundle b = getIntent().getExtras();
+        if (b != null) {
+            System.out.println("Télécharger les données " +b.getString("url"));
+        }
+        else {
+            Constraints constraints = new Constraints.Builder().build();
 
-        /*Constraints constraints = new Constraints.Builder().build();
+            PeriodicWorkRequest downloadRequest =
+                    new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
+                            .setConstraints(constraints)
+                            .build();
 
-        PeriodicWorkRequest downloadRequest =
-                new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
-                        .setConstraints(constraints)
-                        .build();
+            WorkManager.getInstance(getApplicationContext())
+                    .enqueue(downloadRequest);
+        }*/
 
-        WorkManager.getInstance(getApplicationContext())
-                .enqueue(downloadRequest);*/
+        DataSource data = new DataSource(getApplicationContext());
+        data.open();
+        data.initializeAllTable();
+
     }
 
     private void initializeTextView () {

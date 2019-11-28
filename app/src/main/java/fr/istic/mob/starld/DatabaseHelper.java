@@ -8,41 +8,57 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "databaseStarLD.db";
     private static final int DATABASE_VERSION  = 1;
-    private static final String TABLE_ROUTE = "bus_route";
-    private static final String TABLE_TRIP = "trip";
-    private static final String TABLE_STOP = "stop";
-    private static final String TABLE_STOP_TIME = "stop_time";
-    private static final String TABLE_CALENDAR = "calendar";
 
     private static final String CREATE_TABLE_ROUTE =
-            "CREATE TABLE IF NOT EXISTS bus_route" + TABLE_ROUTE+
-                    "(route_id text primary key not null,agency_id text,route_short_name text," +
-                    "route_long_name text,route_desc text,route_type text,route_url text,route_color text," +
-                    "route_text_color text,route_sort_order text)";
+            "CREATE TABLE IF NOT EXISTS " + StarContract.BusRoutes.CONTENT_PATH+
+                    "("+StarContract.BusRoutes.BusRouteColumns._ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    StarContract.BusRoutes.BusRouteColumns.SHORT_NAME + "TEXT, "+
+                    StarContract.BusRoutes.BusRouteColumns.LONG_NAME + " TEXT, "+
+                    StarContract.BusRoutes.BusRouteColumns.DESCRIPTION + " TEXT, "+
+                    StarContract.BusRoutes.BusRouteColumns.TYPE + " TEXT, "+
+                    StarContract.BusRoutes.BusRouteColumns.COLOR + " TEXT, "+
+                    StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR + " TEXT) ";
 
     private static final String CREATE_TABLE_TRIP =
-            "CREATE TABLE IF NOT EXISTS "+ TABLE_TRIP +
-                    " (route_id text primary key not null,service_id text,trip_id text," +
-                    "trip_headsign text,trip_short_name text,direction_id text,block_id text," +
-                    "shape_id text,wheelchair_accessible text,bikes_allowed text )";
+            "CREATE TABLE IF NOT EXISTS "+ StarContract.Trips.CONTENT_PATH +
+                    "("+StarContract.Trips.TripColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                        StarContract.Trips.TripColumns.ROUTE_ID+ " TEXT,"+
+                        StarContract.Trips.TripColumns.SERVICE_ID+ " TEXT,"+
+                        StarContract.Trips.TripColumns.HEADSIGN+ " TEXT,"+
+                        StarContract.Trips.TripColumns.DIRECTION_ID+ " TEXT,"+
+                        StarContract.Trips.TripColumns.BLOCK_ID+ " TEXT,"+
+                        StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+ " TEXT)";
 
     private static final String CREATE_TABLE_STOP =
-            "CREATE TABLE IF NOT EXISTS "+ TABLE_STOP+
-                    " (stop_id text primary key not null,stop_code text,stop_name text," +
-                    "stop_desc text,stop_lat text,stop_lon text,zone_id text,stop_url text," +
-                    "location_type text,parent_station text,stop_timezone text,wheelchair_boarding text)";
+            "CREATE TABLE IF NOT EXISTS "+ StarContract.Stops.CONTENT_PATH+
+                    "("+StarContract.Stops.StopColumns._ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                        StarContract.Stops.StopColumns.NAME + " TEXT, "+
+                        StarContract.Stops.StopColumns.DESCRIPTION + " TEXT, "+
+                        StarContract.Stops.StopColumns.LATITUDE + " TEXT, "+
+                        StarContract.Stops.StopColumns.LONGITUDE +  " TEXT, "+
+                        StarContract.Stops.StopColumns.WHEELCHAIR_BOARDING + " TEXT)";
 
     private static final String CREATE_TABLE_STOP_TIME =
-            "CREATE TABLE IF NOT EXISTS "+ TABLE_STOP_TIME+
-                    " (trip_id text primary key not null,arrival_time text,departure_time text," +
-                    "stop_id text,stop_sequence text,stop_headsign text,pickup_type text," +
-                    "drop_off_type text,shape_dist_traveled text)"
+            "CREATE TABLE IF NOT EXISTS "+ StarContract.StopTimes.CONTENT_PATH+
+                    "("+StarContract.StopTimes.StopTimeColumns._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                        StarContract.StopTimes.StopTimeColumns.TRIP_ID + " TEXT, "+
+                        StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " TEXT, "+
+                        StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME + " TEXT, "+
+                        StarContract.StopTimes.StopTimeColumns.STOP_ID+ " TEXT, "+
+                        StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE+ " TEXT) ";
 
-            ;
     private static final String CREATE_TABLE_CALENDAR =
-            "CREATE TABLE IF NOT EXISTS "+TABLE_CALENDAR+
-                    " (service_id text primary key not null, text,tuesday text,wednesday text," +
-                    "thursday text,friday text,saturday text,sunday text,start_date text,end_date text)";
+            "CREATE TABLE IF NOT EXISTS "+StarContract.Calendar.CONTENT_PATH+
+                    "("+StarContract.Calendar.CalendarColumns._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                        StarContract.Calendar.CalendarColumns.MONDAY+" TEXT,"+
+                        StarContract.Calendar.CalendarColumns.TUESDAY+" TEXT,"+
+                    StarContract.Calendar.CalendarColumns.WEDNESDAY+" TEXT,"+
+                    StarContract.Calendar.CalendarColumns.THURSDAY+" TEXT,"+
+                    StarContract.Calendar.CalendarColumns.FRIDAY+" TEXT,"+
+                    StarContract.Calendar.CalendarColumns.SATURDAY+" TEXT,"+
+                    StarContract.Calendar.CalendarColumns.SUNDAY+" TEXT,"+
+                    StarContract.Calendar.CalendarColumns.START_DATE+" TEXT,"+
+                    StarContract.Calendar.CalendarColumns.END_DATE+" TEXT)";
 
     public DatabaseHelper (Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -59,11 +75,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_ROUTE);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_TRIP);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_STOP);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_STOP_TIME);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_CALENDAR);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ StarContract.BusRoutes.CONTENT_PATH);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ StarContract.Trips.CONTENT_PATH);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ StarContract.Stops.CONTENT_PATH);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ StarContract.StopTimes.CONTENT_PATH);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ StarContract.Calendar.CONTENT_PATH);
         onCreate(sqLiteDatabase);
     }
 }

@@ -22,13 +22,13 @@
             android:id="@+id/textViewDate"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Date"/>
+            android:hint="@string/date_tv"/>
 
         <TextView
             android:id="@+id/textViewHour"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Heure"/>
+            android:hint="@string/hour_tv"/>
 
         <Spinner
             android:id="@+id/listBus"
@@ -39,7 +39,7 @@
             android:id="@+id/buttonValidate"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Valider" />
+            android:text="@string/button_validate" />
     </TableRow>
 
     </TableLayout>

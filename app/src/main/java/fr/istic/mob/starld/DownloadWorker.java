@@ -1,8 +1,15 @@
 package fr.istic.mob.starld;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -24,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class DownloadWorker extends Worker {
 
@@ -98,8 +106,38 @@ public class DownloadWorker extends Worker {
             }
         }
 
+        createNotification();
         // Indicate whether the task finished successfully with the Result
         return Result.success();
+    }
+    private void createNotification () {
+
+        System.out.println("Dans notif");
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("url", "google.fr");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "Notif")
+                .setSmallIcon(R.drawable.icon_notif)
+                .setContentTitle(getApplicationContext().getString(R.string.notif_title))
+                .setContentText(getApplicationContext().getString(R.string.notif_content))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("notification_download", "Dowload BD infos", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(channel);
+            builder.setChannelId("notification_download");
+        }
+
+        NotificationManagerCompat notification = NotificationManagerCompat.from(getApplicationContext());
+        notification.notify(12, builder.build());
+
+
     }
 
     private void saveStringInMemory (String JSONToSave) {
