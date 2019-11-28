@@ -50,26 +50,18 @@ public class MainActivity extends AppCompatActivity {
         validate = findViewById(R.id.buttonValidate);
         this.initializeTextView();
 
-      /* Bundle b = getIntent().getExtras();
-        if (b != null) {
-            System.out.println("Télécharger les données " +b.getString("url"));
-        }
-        else {
-            Constraints constraints = new Constraints.Builder().build();
+        /*Constraints constraints = new Constraints.Builder().build();
 
-            PeriodicWorkRequest downloadRequest =
+        PeriodicWorkRequest downloadRequest =
                     new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
                             .setConstraints(constraints)
                             .build();
 
-            WorkManager.getInstance(getApplicationContext())
-                    .enqueue(downloadRequest);
-        }*/
+        WorkManager.getInstance(getApplicationContext()).enqueue(downloadRequest);*/
 
-        DataSource data = new DataSource(getApplicationContext());
+        /*DataSource data = new DataSource(getApplicationContext());
         data.open();
-        data.initializeAllTable();
-
+        data.initializeDatabase();*/
     }
 
     private void initializeTextView () {
@@ -99,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void createNotification () {
 
@@ -131,8 +124,10 @@ public class MainActivity extends AppCompatActivity {
 
         DownloadManager.Request request = new DownloadManager.Request(uri);
         request.setTitle(getString(R.string.notif_dowload_title));
+        request.setDescription("blabla");
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+        request.setAllowedOverRoaming(false);
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-        request.setMimeType("zip");
         request.setDestinationInExternalFilesDir(getApplicationContext(),Environment.DIRECTORY_DOWNLOADS,"Test.zip");
 
 

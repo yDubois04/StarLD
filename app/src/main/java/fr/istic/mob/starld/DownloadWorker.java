@@ -54,6 +54,7 @@ public class DownloadWorker extends Worker {
         //Get current date
         Date date = new Date();
 
+        this.createNotification();
         String jsonResult = getJsonFromUrl();
         String lastJSONString = getStringSaved("JSONResult.txt");
 
