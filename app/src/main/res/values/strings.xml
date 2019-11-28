@@ -2,5 +2,8 @@
     <string name="app_name">StarLD</string>
     <string name="notif_title">Données à télécharger</string>
     <string name="notif_content">Appuyer sur la notification pour télécharger les nouvelles données</string>
-    <string name="notif_dowload_title">Téléchargement des données</string>
+    <string name="notif_dowload_title" translatable="false">Téléchargement des données</string>
+    <string name="button_validate">Valider</string>
+    <string name="date_tv">Date</string>
+    <string name="hour_tv">Heure</string>
 </resources>
