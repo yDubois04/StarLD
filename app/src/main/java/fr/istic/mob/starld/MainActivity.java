@@ -16,9 +16,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import java.io.File;
@@ -37,18 +39,23 @@ public class MainActivity extends AppCompatActivity {
     TextView chooseDate;
     Calendar calendar;
     Button validate;
-    int idNotif = 0;
+    ProgressBar progressBar;
+    private static MainActivity instanceMain;
+    Handler progressHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        progressBar = findViewById(R.id.progressBarDownload);
         chooseHour = findViewById(R.id.textViewHour);
         chooseDate = findViewById(R.id.textViewDate);
         calendar = GregorianCalendar.getInstance();
         validate = findViewById(R.id.buttonValidate);
+        instanceMain = this;
         this.initializeTextView();
+
 
         /*Constraints constraints = new Constraints.Builder().build();
 
@@ -92,27 +99,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-    private void createNotification () {
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "Notif")
-                .setSmallIcon(R.drawable.icon_notif)
-                .setContentTitle(getString(R.string.notif_title))
-                .setContentText(getString(R.string.notif_content))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("notification_download", "Dowload BD infos", NotificationManager.IMPORTANCE_DEFAULT);
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            manager.createNotificationChannel(channel);
-            builder.setChannelId("notification_download");
-        }
-
-        NotificationManagerCompat notification = NotificationManagerCompat.from(this);
-        notification.notify(idNotif, builder.build());
-
-
+    public static MainActivity getMainActivityInstance () {
+        return instanceMain;
     }
 
     private long saveFile () {
