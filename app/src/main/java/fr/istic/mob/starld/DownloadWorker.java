@@ -1,13 +1,12 @@
 package fr.istic.mob.starld;
 
-import android.app.DownloadManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -20,7 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,8 +30,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -60,7 +56,7 @@ public class DownloadWorker extends Worker {
         String jsonResult = getJsonFromUrl();
         String lastJSONString = getStringSaved("JSONResult.txt");
 
-        if(!jsonResult.equals(lastJSONString)){
+        if(!jsonResult.equals(lastJSONString) || lastJSONString.equals("")){
             try {
                 JSONObject jsonObjectResult = new JSONObject(jsonResult);
                 JSONArray arr = jsonObjectResult.getJSONArray("records");
@@ -80,7 +76,20 @@ public class DownloadWorker extends Worker {
                 if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0){
                     url = firstFields.getString("url");
                     saveStringInMemory("JSONResult.txt", jsonResult);
-                    createNotification(url);
+
+                    if(!lastJSONString.equals("")){
+                        createNotification();
+                    }
+                    else{
+                        Intent downloadIntent = new Intent(getApplicationContext(), MainActivity.class);
+                        downloadIntent.putExtra("url", url);
+                        downloadIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+
+                        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                        stackBuilder.addNextIntent(downloadIntent);
+
+                        stackBuilder.startActivities();
+                    }
                 }
                 else{
                     JSONObject secondFields = arr.getJSONObject(1).getJSONObject("fields");
@@ -98,9 +107,21 @@ public class DownloadWorker extends Worker {
                     //if the second object in records is still valid, take the url from it
                     if(date.compareTo(finValiditeDate) <= 0 && date.compareTo(debutValiditeDate) >= 0) {
                         url = secondFields.getString("url");
-
                         saveStringInMemory("JSONResult.txt", jsonResult);
-                        createNotification(url);
+
+                        if(!lastJSONString.equals("")){
+                            createNotification();
+                        }
+                        else{
+                            Intent downloadIntent = new Intent(getApplicationContext(), MainActivity.class);
+                            downloadIntent.putExtra("url", url);
+                            downloadIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+
+                            TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                            stackBuilder.addNextIntent(downloadIntent);
+
+                            stackBuilder.startActivities();
+                        }
                     }
 
                     //If none are valid, we keep the old one
@@ -195,17 +216,28 @@ public class DownloadWorker extends Worker {
             return responseJSON;
         }
     }
-    
-    private void createNotification (String url) {
 
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.putExtra("url", url);
+    private void createNotification () {
+
+        Intent downloadIntent = new Intent(getApplicationContext(), MainActivity.class);
+        downloadIntent.putExtra("url", url);
+        downloadIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+        stackBuilder.addNextIntent(downloadIntent);
+
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "Notif")
                 .setSmallIcon(R.drawable.icon_notif)
                 .setContentTitle(getApplicationContext().getString(R.string.notif_title))
                 .setContentText(getApplicationContext().getString(R.string.notif_content))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(resultPendingIntent)
+                .setAutoCancel(true);
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
