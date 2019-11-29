@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:columnCount="1"
-        android:rowCount="4"
+        android:rowCount="5"
         android:stretchColumns="0,1,2,3">
 
         <TableRow
@@ -31,7 +31,12 @@
                 android:hint="@string/hour_tv"/>
 
             <Spinner
-                android:id="@+id/listBus"
+                android:id="@+id/busSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <Spinner
+                android:id="@+id/sensSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 
@@ -51,7 +56,7 @@
                 android:id="@+id/progressBarDownload"
                 android:max = "100"
                 style="?android:attr/progressBarStyleHorizontal"
-                android:layout_span="4"/>
+                android:layout_span="5"/>
 
         </TableRow>
 

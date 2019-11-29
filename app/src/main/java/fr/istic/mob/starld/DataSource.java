@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DataSource {
@@ -42,7 +43,7 @@ public class DataSource {
         this.initializeTable("trips.txt", StarContract.Trips.CONTENT_PATH);
         this.initializeTable("stops.txt", StarContract.Stops.CONTENT_PATH);
         this.initializeTable("calendar.txt", StarContract.Calendar.CONTENT_PATH);
-        this.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
+        //this.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
     }
 
     public void clearDatabase () {
@@ -90,7 +91,6 @@ public class DataSource {
             }
 
             insertInDB (list,nameTable);
-            System.out.println("fin route");
             buffered.close();
             reader.close();
         }
@@ -272,5 +272,55 @@ public class DataSource {
         }
         database.setTransactionSuccessful();
         database.endTransaction();
+    }
+
+    public ArrayList<String> getBusesName () {
+        ArrayList<String> ret = new ArrayList<>();
+
+        String req = "SELECT "+ StarContract.BusRoutes.BusRouteColumns.SHORT_NAME +" FROM "+StarContract.BusRoutes.CONTENT_PATH;
+        Cursor cursor = database.rawQuery(req,null);
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+            String busName = cursor.getString(0);
+            ret.add(busName);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return ret;
+    }
+
+    public ArrayList<String> getBusesColor () {
+        ArrayList<String> ret = new ArrayList<>();
+
+        String req = "SELECT "+ StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR +" FROM "+StarContract.BusRoutes.CONTENT_PATH;
+        Cursor cursor = database.rawQuery(req,null);
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+            String busColor = cursor.getString(0);
+            ret.add(busColor);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return ret;
+    }
+
+    public ArrayList<String> getSensForBus (String busName) {
+        ArrayList <String> ret = new ArrayList<>();
+
+        String req = "SELECT "+ StarContract.BusRoutes.BusRouteColumns.LONG_NAME +
+                     " FROM "+StarContract.BusRoutes.CONTENT_PATH+
+                     " WHERE "+StarContract.BusRoutes.BusRouteColumns.SHORT_NAME +" = \""+busName+"\"";
+
+        Cursor cursor = database.rawQuery(req,null);
+        cursor.moveToFirst();
+        String line = cursor.getString(0);
+        String [] columns = line.split("<>");
+
+        ret.add(columns[0]);
+        ret.add(columns[columns.length-1]);
+
+        return ret;
     }
 }

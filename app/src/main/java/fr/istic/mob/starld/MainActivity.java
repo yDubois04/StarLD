@@ -1,32 +1,36 @@
 package fr.istic.mob.starld;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
+
+import android.app.ActionBar;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.TabHost;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
@@ -39,9 +43,10 @@ public class MainActivity extends AppCompatActivity {
     TextView chooseDate;
     Calendar calendar;
     Button validate;
+    Spinner spinnerBus;
+    Spinner spinnerSens;
     ProgressBar progressBar;
-    private static MainActivity instanceMain;
-    Handler progressHandler = new Handler();
+    private DataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,27 +56,43 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarDownload);
         chooseHour = findViewById(R.id.textViewHour);
         chooseDate = findViewById(R.id.textViewDate);
-        calendar = GregorianCalendar.getInstance();
         validate = findViewById(R.id.buttonValidate);
-        instanceMain = this;
-        this.initializeTextView();
+        spinnerBus = findViewById(R.id.busSpinner);
+        spinnerSens = findViewById(R.id.sensSpinner);
+        calendar = GregorianCalendar.getInstance();
 
+        dataSource = new DataSource(this);
+        dataSource.open();
 
+        //Create Work manager
         /*Constraints constraints = new Constraints.Builder().build();
-
         PeriodicWorkRequest downloadRequest =
-                    new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
-                            .setConstraints(constraints)
-                            .build();
+                new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
+                        .setConstraints(constraints)
+                        .build();
 
         WorkManager.getInstance(getApplicationContext()).enqueue(downloadRequest);*/
 
-        /*DataSource data = new DataSource(getApplicationContext());
-        data.open();
-        data.initializeDatabase();*/
-    }
+        //Initializes spinners
+        final ArrayList<String> buses = dataSource.getBusesName ();
+        final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this,R.layout.spinner_simple_item,buses);
+        listBusAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
+        spinnerBus.setAdapter(listBusAdapter);
 
-    private void initializeTextView () {
+        spinnerBus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                ArrayList<String> sens = dataSource.getSensForBus (buses.get(i));
+                ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.spinner_simple_item, sens);
+                listSensAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
+                spinnerSens.setAdapter(listSensAdapter);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        //Initializes Text View
         chooseHour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,10 +118,6 @@ public class MainActivity extends AppCompatActivity {
                 datePickerDialog.show();
             }
         });
-    }
-
-    public static MainActivity getMainActivityInstance () {
-        return instanceMain;
     }
 
     private long saveFile () {
