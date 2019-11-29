@@ -4,9 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;;
 import android.app.TimePickerDialog;
@@ -20,22 +17,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.TabHost;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,50 +35,42 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinnerSens;
     ProgressBar progressBar;
     private DataSource dataSource;
+    String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-        progressBar = findViewById(R.id.progressBarDownload);
         chooseHour = findViewById(R.id.textViewHour);
         chooseDate = findViewById(R.id.textViewDate);
         validate = findViewById(R.id.buttonValidate);
         spinnerBus = findViewById(R.id.busSpinner);
         spinnerSens = findViewById(R.id.sensSpinner);
+        progressBar = findViewById(R.id.progressBarDownload);
         calendar = GregorianCalendar.getInstance();
 
         dataSource = new DataSource(this);
         dataSource.open();
 
-        //Create Work manager
-        /*Constraints constraints = new Constraints.Builder().build();
+        Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
                         .setConstraints(constraints)
                         .build();
 
-        WorkManager.getInstance(getApplicationContext()).enqueue(downloadRequest);*/
 
-        //Initializes spinners
-        final ArrayList<String> buses = dataSource.getBusesName ();
-        final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this,R.layout.spinner_simple_item,buses);
-        listBusAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
-        spinnerBus.setAdapter(listBusAdapter);
+        WorkManager.getInstance(getApplicationContext())
+                .enqueue(downloadRequest);
 
-        spinnerBus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ArrayList<String> sens = dataSource.getSensForBus (buses.get(i));
-                ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.spinner_simple_item, sens);
-                listSensAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
-                spinnerSens.setAdapter(listSensAdapter);
+        if(getIntent().getExtras() != null) {
+            url = getIntent().getExtras().getString("url");
+            System.out.println("URL in Main Activity : " + url);
+            if (url != null && url != "") {
+                startDownload();
             }
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
+        }
 
         //Initializes Text View
         chooseHour.setOnClickListener(new View.OnClickListener() {
@@ -118,60 +98,37 @@ public class MainActivity extends AppCompatActivity {
                 datePickerDialog.show();
             }
         });
+
+        //Initializes spinners
+        final ArrayList<String> buses = dataSource.getBusesName ();
+        final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this,R.layout.spinner_simple_item,buses);
+        listBusAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
+        spinnerBus.setAdapter(listBusAdapter);
+
+        spinnerBus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                ArrayList<String> sens = dataSource.getSensForBus (buses.get(i));
+                ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.spinner_simple_item, sens);
+                listSensAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
+                spinnerSens.setAdapter(listSensAdapter);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
     }
 
-    private long saveFile () {
-
-        long download = 0;
-
-        String url = "http://ftp.keolis-rennes.com/opendata/tco-busmetro-horaires-gtfs-versions-td/attachments/GTFS_2019.4.0_20191223_20200105.zip";
+    public void startDownload(){
         Uri uri = Uri.parse(url);
 
         DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setTitle(getString(R.string.notif_dowload_title));
-        request.setDescription("blabla");
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-        request.setAllowedOverRoaming(false);
+        request.setTitle(getApplicationContext().getString(R.string.notif_dowload_title));
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-        request.setDestinationInExternalFilesDir(getApplicationContext(),Environment.DIRECTORY_DOWNLOADS,"Test.zip");
-
+        request.setMimeType("zip");
+        request.setDestinationInExternalFilesDir(getApplicationContext(), Environment.DIRECTORY_DOWNLOADS,"Infos.zip");
 
         DownloadManager manager = (DownloadManager)getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
-        download = manager.enqueue(request);
-
-        return download;
-    }
-
-    private void dezipFile () {
-        byte [] buffer = new byte [1024];
-
-        try {
-            File dest = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            File file = new File(dest, "Infos.zip");
-            ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file));
-            ZipEntry entry = zipInputStream.getNextEntry();
-
-
-            while (entry != null) {
-                String fileName = entry.getName();
-                File newFile = new File(dest+File.separator+fileName);
-
-                new File (newFile.getParent()).mkdirs();
-
-                FileOutputStream fos = new FileOutputStream(newFile);
-
-                int i;
-                while ((i = zipInputStream.read(buffer)) > 0) {
-                    fos.write(buffer, 0, i);
-                }
-                fos.close();
-                entry = zipInputStream.getNextEntry();
-            }
-            zipInputStream.closeEntry();
-            zipInputStream.close();
-        }
-        catch (IOException e) {
-            System.out.println("Erreur "+e);
-        }
+        manager.enqueue(request);
     }
 }
