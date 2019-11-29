@@ -1,19 +1,14 @@
 package fr.istic.mob.starld;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.view.View;
-import android.widget.ProgressBar;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DataSource {
@@ -40,10 +35,14 @@ public class DataSource {
     public void initializeDatabase () {
         this.clearDatabase ();
         this.initializeTable("routes.txt", StarContract.BusRoutes.CONTENT_PATH);
-        this.initializeTable("trips.txt", StarContract.Trips.CONTENT_PATH);
         this.initializeTable("stops.txt", StarContract.Stops.CONTENT_PATH);
+        this.initializeTable("trips.txt", StarContract.Trips.CONTENT_PATH);
         this.initializeTable("calendar.txt", StarContract.Calendar.CONTENT_PATH);
-        //this.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
+        this.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
+    }
+
+    public void updateDatabase (int i, int i1) {
+        databaseHelper.onUpgrade(database,i, i1);
     }
 
     public void clearDatabase () {
@@ -51,12 +50,15 @@ public class DataSource {
         database.execSQL("DELETE FROM "+StarContract.StopTimes.CONTENT_PATH);
         database.execSQL("DELETE FROM "+StarContract.Stops.CONTENT_PATH);
         database.execSQL("DELETE FROM "+StarContract.Trips.CONTENT_PATH);
-        database.execSQL("DELETE FROM "+StarContract.StopTimes.CONTENT_PATH);
+        database.execSQL("DELETE FROM "+StarContract.Calendar.CONTENT_PATH);
     }
 
     public void initializeTable (String fileName, String nameTable) {
         File file = new File(dowloadFolder, fileName);
-        ArrayList<ContentValues> list = new ArrayList<>();
+
+        String requete = getInsertRequete(nameTable);
+        database.beginTransactionNonExclusive();
+        SQLiteStatement statement = database.compileStatement(requete);
 
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
@@ -68,117 +70,58 @@ public class DataSource {
                 String lineWithoutQuote = line.replace("\"", "");
                 String[] columnsContent = lineWithoutQuote.split(",");
 
-                if (fileName.equals("routes.txt")) {
-                    ContentValues contentValues = fillContentValue (StarContract.BusRoutes.CONTENT_PATH, columnsContent);
-                    list.add(contentValues);
+                if (nameTable.equals(StarContract.BusRoutes.CONTENT_PATH)) {
+                    statement.bindString(1,columnsContent[2]);
+                    statement.bindString(2,columnsContent[3]);
+                    statement.bindString(3, columnsContent[4]);
+                    statement.bindLong(4, Integer.parseInt(columnsContent[5]));
+                    statement.bindString(5,columnsContent[7]);
+                    statement.bindString(6, columnsContent[8]);
                 }
-                else if (fileName.equals("trips.txt")) {
-                    ContentValues contentValues = fillContentValue (StarContract.Trips.CONTENT_PATH, columnsContent);
-                    list.add(contentValues);
+                else if (nameTable.equals(StarContract.Trips.CONTENT_PATH)) {
+                    statement.bindLong(1, Integer.parseInt(columnsContent[0]));
+                    statement.bindLong(2,Integer.parseInt(columnsContent[1]));
+                    statement.bindString(3, columnsContent[3]);
+                    statement.bindLong(4, Integer.parseInt(columnsContent[5]));
+                    statement.bindString(5,columnsContent[6]);
+                    statement.bindLong(6,Integer.parseInt(columnsContent[8]));
                 }
-                else if (fileName.equals("stops.txt")) {
-                    ContentValues contentValues = fillContentValue (StarContract.Stops.CONTENT_PATH, columnsContent);
-                    list.add(contentValues);
+                else if (nameTable.equals(StarContract.Stops.CONTENT_PATH)) {
+                    statement.bindString(1, columnsContent[2]);
+                    statement.bindString(2,columnsContent[3]);
+                    statement.bindString(3, columnsContent[4]);
+                    statement.bindString(4, columnsContent[5]);
+                    statement.bindLong(5, Integer.parseInt(columnsContent[11]));
                 }
-                else if (fileName.equals("calendar.txt")) {
-                    ContentValues contentValues = fillContentValue (StarContract.Calendar.CONTENT_PATH, columnsContent);
-                    list.add(contentValues);
+                else if (nameTable.equals(StarContract.Calendar.CONTENT_PATH)) {
+                    statement.bindLong(1, Integer.parseInt(columnsContent[1]));
+                    statement.bindLong(2, Integer.parseInt(columnsContent[2]));
+                    statement.bindLong(3, Integer.parseInt(columnsContent[3]));
+                    statement.bindLong(4, Integer.parseInt(columnsContent[4]));
+                    statement.bindLong(5, Integer.parseInt(columnsContent[5]));
+                    statement.bindLong(6,Integer.parseInt(columnsContent[6]));
+                    statement.bindLong(7,Integer.parseInt(columnsContent[7]));
+                    statement.bindLong(8,Integer.parseInt(columnsContent[8]));
+                    statement.bindLong(9,Integer.parseInt(columnsContent[9]));
                 }
-                else if (fileName.equals("stop_times.txt")) {
-                    ContentValues contentValues = fillContentValue (StarContract.StopTimes.CONTENT_PATH, columnsContent);
-                    list.add(contentValues);
+                else if (nameTable.equals(StarContract.StopTimes.CONTENT_PATH)) {
+                    statement.bindLong(1, Integer.parseInt(columnsContent[0]));
+                    statement.bindString(1, columnsContent[1]);
+                    statement.bindString(2, columnsContent[2]);
+                    statement.bindLong(3, Integer.parseInt(columnsContent[3]));
+                    statement.bindLong(4, Integer.parseInt(columnsContent[4]));
                 }
+
+                statement.execute();
+                statement.clearBindings();
             }
-
-            insertInDB (list,nameTable);
-            buffered.close();
-            reader.close();
-        }
-
-        catch (IOException e) {
+            database.setTransactionSuccessful();
+            database.endTransaction();
+        }catch (IOException e) {
             System.out.println("Erreur "+e);
         }
     }
 
-    private ContentValues fillContentValue (String tableName, String [] content) {
-        ContentValues contentValues = new ContentValues();
-
-        if (tableName.equals(StarContract.BusRoutes.CONTENT_PATH)) {
-            contentValues.put(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME, content[2]);
-            contentValues.put(StarContract.BusRoutes.BusRouteColumns.LONG_NAME, content[3]);
-            contentValues.put(StarContract.BusRoutes.BusRouteColumns.DESCRIPTION, content[4]);
-            contentValues.put(StarContract.BusRoutes.BusRouteColumns.TYPE, Integer.parseInt(content[5]));
-            contentValues.put(StarContract.BusRoutes.BusRouteColumns.COLOR, content[7]);
-            contentValues.put(StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR, content[8]);
-        }
-        else if (tableName.equals(StarContract.Trips.CONTENT_PATH)) {
-            contentValues.put(StarContract.Trips.TripColumns.ROUTE_ID, Integer.parseInt(content[0]));
-            contentValues.put(StarContract.Trips.TripColumns.SERVICE_ID, Integer.parseInt(content[1]));
-            contentValues.put(StarContract.Trips.TripColumns.HEADSIGN, content[3]);
-            contentValues.put(StarContract.Trips.TripColumns.DIRECTION_ID, Integer.parseInt(content[5]));
-            contentValues.put(StarContract.Trips.TripColumns.BLOCK_ID, content[6]);
-            contentValues.put(StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE, Integer.parseInt(content[8]));
-        }
-        else if (tableName.equals(StarContract.Stops.CONTENT_PATH)) {
-            contentValues.put(StarContract.Stops.StopColumns.NAME, content[2]);
-            contentValues.put(StarContract.Stops.StopColumns.DESCRIPTION, content[3]);
-            contentValues.put(StarContract.Stops.StopColumns.LATITUDE, content[4]);
-            contentValues.put(StarContract.Stops.StopColumns.LONGITUDE, content[5]);
-            contentValues.put(StarContract.Stops.StopColumns.WHEELCHAIR_BOARDING, Integer.parseInt(content[11]));
-        }
-        else if (tableName.equals(StarContract.Calendar.CONTENT_PATH)) {
-            contentValues.put(StarContract.Calendar.CalendarColumns.MONDAY, Integer.parseInt(content[1]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.TUESDAY, Integer.parseInt(content[2]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.WEDNESDAY, Integer.parseInt(content[3]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.THURSDAY, Integer.parseInt(content[4]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.FRIDAY, Integer.parseInt(content[5]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.SATURDAY, Integer.parseInt(content[6]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.SUNDAY, Integer.parseInt(content[7]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.START_DATE,Integer.parseInt (content[8]));
-            contentValues.put(StarContract.Calendar.CalendarColumns.END_DATE, Integer.parseInt(content[9]));
-        }
-        else if (tableName.equals(StarContract.StopTimes.CONTENT_PATH)) {
-            contentValues.put(StarContract.StopTimes.StopTimeColumns.TRIP_ID, Integer.parseInt(content[0]));
-            contentValues.put(StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME, content[1]);
-            contentValues.put(StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME, content[2]);
-            contentValues.put(StarContract.StopTimes.StopTimeColumns.STOP_ID, Integer.parseInt(content[3]));
-            contentValues.put(StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE, Integer.parseInt(content[4]));
-        }
-        return contentValues;
-    }
-
-/*
-    public void initializeStopTimeTable () {
-        File file = new File(dowloadFolder, "stop_times.txt");
-        try {
-            ContentValues newValues = new ContentValues();
-            FileInputStream fileInputStream = new FileInputStream(file);
-            InputStreamReader reader = new InputStreamReader(fileInputStream);
-            BufferedReader buffered = new BufferedReader(reader);
-            String line = buffered.readLine();
-
-            while ((line = buffered.readLine()) != null) {
-                String lineWithoutQuote = line.replace("\"", "");
-                String[] columns = lineWithoutQuote.split(",");
-
-                newValues.put(StarContract.StopTimes.StopTimeColumns.TRIP_ID, Integer.parseInt(columns[0]));
-                newValues.put(StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME, columns[1]);
-                newValues.put(StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME, columns[2]);
-                newValues.put(StarContract.StopTimes.StopTimeColumns.STOP_ID, Integer.parseInt(columns[3]));
-                newValues.put(StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE, Integer.parseInt(columns[4]));
-
-                database.insert(StarContract.StopTimes.CONTENT_PATH, null, newValues);
-            }
-            buffered.close();
-            reader.close();
-        } catch (IOException e) {
-            System.out.println("Erreur " + e);
-        }
-    }*/
-
-    public void updateDatabase (int i, int i1) {
-        databaseHelper.onUpgrade(database,i, i1);
-    }
 
     private String getInsertRequete (String tableName) {
         String requete = "";
@@ -216,62 +159,6 @@ public class DataSource {
                     StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE+ ") VALUES (?,?,?,?,?)";
         }
         return requete;
-    }
-
-    public void insertInDB (ArrayList<ContentValues> listValue, String nameTable) {
-        String req = getInsertRequete(nameTable);
-
-        database.beginTransactionNonExclusive();
-        SQLiteStatement statement = database.compileStatement(req);
-
-        for (ContentValues content : listValue) {
-            if (nameTable.equals(StarContract.BusRoutes.CONTENT_PATH)) {
-                statement.bindString(1,(String)content.get(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME));
-                statement.bindString(2,(String)content.get(StarContract.BusRoutes.BusRouteColumns.LONG_NAME));
-                statement.bindString(3,(String)content.get(StarContract.BusRoutes.BusRouteColumns.DESCRIPTION));
-                statement.bindLong(4,(Integer) content.get(StarContract.BusRoutes.BusRouteColumns.TYPE));
-                statement.bindString(5,(String)content.get(StarContract.BusRoutes.BusRouteColumns.COLOR));
-                statement.bindString(6,(String)content.get(StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR));
-            }
-            else if (nameTable.equals(StarContract.Trips.CONTENT_PATH)) {
-                statement.bindLong(1,(Integer)content.get(StarContract.Trips.TripColumns.ROUTE_ID));
-                statement.bindLong(2,(Integer)content.get(StarContract.Trips.TripColumns.SERVICE_ID));
-                statement.bindString(3,(String)content.get(StarContract.Trips.TripColumns.HEADSIGN));
-                statement.bindLong(4,(Integer) content.get(StarContract.Trips.TripColumns.DIRECTION_ID));
-                statement.bindString(5,(String)content.get(StarContract.Trips.TripColumns.BLOCK_ID));
-                statement.bindLong(6,(Integer)content.get(StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE));
-            }
-            else if (nameTable.equals(StarContract.Stops.CONTENT_PATH)) {
-                statement.bindString(1,(String) content.get(StarContract.Stops.StopColumns.NAME));
-                statement.bindString(2,(String) content.get(StarContract.Stops.StopColumns.DESCRIPTION));
-                statement.bindString(3,(String)content.get(StarContract.Stops.StopColumns.LATITUDE));
-                statement.bindString(4,(String) content.get(StarContract.Stops.StopColumns.LONGITUDE));
-                statement.bindLong(5,(Integer)content.get(StarContract.Stops.StopColumns.WHEELCHAIR_BOARDING));
-            }
-            else if (nameTable.equals(StarContract.Calendar.CONTENT_PATH)) {
-                statement.bindLong(1,(Integer) content.get(StarContract.Calendar.CalendarColumns.MONDAY));
-                statement.bindLong(2,(Integer) content.get(StarContract.Calendar.CalendarColumns.TUESDAY));
-                statement.bindLong(3,(Integer)content.get(StarContract.Calendar.CalendarColumns.WEDNESDAY));
-                statement.bindLong(4,(Integer) content.get(StarContract.Calendar.CalendarColumns.THURSDAY));
-                statement.bindLong(5,(Integer)content.get(StarContract.Calendar.CalendarColumns.FRIDAY));
-                statement.bindLong(6,(Integer) content.get(StarContract.Calendar.CalendarColumns.SATURDAY));
-                statement.bindLong(7,(Integer) content.get(StarContract.Calendar.CalendarColumns.SUNDAY));
-                statement.bindLong(8,(Integer)content.get(StarContract.Calendar.CalendarColumns.START_DATE));
-                statement.bindLong(9,(Integer) content.get(StarContract.Calendar.CalendarColumns.END_DATE));
-            }
-            else if (nameTable.equals(StarContract.StopTimes.CONTENT_PATH)) {
-                statement.bindLong(1,(Integer) content.get(StarContract.StopTimes.StopTimeColumns.TRIP_ID));
-                statement.bindString(2,(String) content.get(StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME));
-                statement.bindString(3,(String) content.get(StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME));
-                statement.bindLong(4,(Integer) content.get(StarContract.StopTimes.StopTimeColumns.STOP_ID));
-                statement.bindLong(5,(Integer)content.get(StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE));
-            }
-
-            statement.execute();
-            statement.clearBindings();
-        }
-        database.setTransactionSuccessful();
-        database.endTransaction();
     }
 
     public ArrayList<String> getBusesName () {

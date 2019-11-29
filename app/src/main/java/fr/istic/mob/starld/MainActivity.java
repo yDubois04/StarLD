@@ -53,8 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
         dataSource = new DataSource(this);
         dataSource.open();
+        dataSource.initializeDatabase();
 
-        Constraints constraints = new Constraints.Builder().build();
+       /* Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
                         .setConstraints(constraints)
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             if (url != null && url != "") {
                 startDownload();
             }
-        }
+        }*/
 
         //Initializes Text View
         chooseHour.setOnClickListener(new View.OnClickListener() {
