@@ -11,7 +11,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         dataSource = new DataSource(this);
         dataSource.open();
-        dataSource.initializeDatabase();
+        //dataSource.initializeDatabase();
 
        /* Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
@@ -102,16 +104,14 @@ public class MainActivity extends AppCompatActivity {
 
         //Initializes spinners
         final ArrayList<String> buses = dataSource.getBusesName ();
-        final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this,R.layout.spinner_simple_item,buses);
-        listBusAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
+        final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,buses);
         spinnerBus.setAdapter(listBusAdapter);
 
         spinnerBus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 ArrayList<String> sens = dataSource.getSensForBus (buses.get(i));
-                ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.spinner_simple_item, sens);
-                listSensAdapter.setDropDownViewResource(R.layout.spinner_simple_item_dropdown);
+                ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.support_simple_spinner_dropdown_item, sens);
                 spinnerSens.setAdapter(listSensAdapter);
             }
             @Override

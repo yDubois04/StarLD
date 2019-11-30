@@ -20,31 +20,41 @@
 
             <TextView
                 android:id="@+id/textViewDate"
+                android:padding="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="@string/date_tv"/>
+                android:hint="Choisissez une date"/>
 
             <TextView
                 android:id="@+id/textViewHour"
+                android:padding="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="@string/hour_tv"/>
+                android:hint="Choisissez une heure"/>
+        </TableRow>
+
+        <TableRow>
 
             <Spinner
                 android:id="@+id/busSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:spinnerMode="dropdown"
+                android:dropDownWidth="200px"/>
 
             <Spinner
                 android:id="@+id/sensSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:spinnerMode="dropdown"/>
+        </TableRow>
 
-            <Button
-                android:id="@+id/buttonValidate"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/button_validate" />
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+        <Button
+            android:id="@+id/buttonValidate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/button_validate" />
         </TableRow>
 
         <TableRow
@@ -57,7 +67,6 @@
                 android:max = "100"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_span="5"/>
-
         </TableRow>
 
     </TableLayout>
