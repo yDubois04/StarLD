@@ -11,9 +11,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,10 +20,17 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,8 +41,9 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinnerBus;
     Spinner spinnerSens;
     ProgressBar progressBar;
-    private DataSource dataSource;
     String url;
+
+    DataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,27 +59,14 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarDownload);
         calendar = GregorianCalendar.getInstance();
 
-        dataSource = new DataSource(this);
-        dataSource.open();
-        //dataSource.initializeDatabase();
-
-       /* Constraints constraints = new Constraints.Builder().build();
+        Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
                         .setConstraints(constraints)
                         .build();
 
-
         WorkManager.getInstance(getApplicationContext())
                 .enqueue(downloadRequest);
-
-        if(getIntent().getExtras() != null) {
-            url = getIntent().getExtras().getString("url");
-            System.out.println("URL in Main Activity : " + url);
-            if (url != null && url != "") {
-                startDownload();
-            }
-        }*/
 
         //Initializes Text View
         chooseHour.setOnClickListener(new View.OnClickListener() {
@@ -102,24 +95,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Initializes spinners
-        final ArrayList<String> buses = dataSource.getBusesName ();
-        final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,buses);
-        spinnerBus.setAdapter(listBusAdapter);
 
-        spinnerBus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ArrayList<String> sens = dataSource.getSensForBus (buses.get(i));
-                ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.support_simple_spinner_dropdown_item, sens);
-                spinnerSens.setAdapter(listSensAdapter);
+        if(getIntent().getExtras() != null) {
+            url = getIntent().getExtras().getString("url");
+            System.out.println("URL in Main Activity : " + url);
+            if (url != null && url != "") {
+                startDownload();
             }
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
+            else if(getIntent().getExtras().getBoolean("DLComplete")){
+                unzip();
             }
-        });
+            else if(getIntent().getExtras().getBoolean("DBFull")){
+                initializeSpinners();
+            }
+        }
     }
-
     public void startDownload(){
         Uri uri = Uri.parse(url);
 
@@ -131,5 +121,66 @@ public class MainActivity extends AppCompatActivity {
 
         DownloadManager manager = (DownloadManager)getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
+    }
+
+    public void unzip(){
+        byte[] buffer = new byte[1024];
+
+        try {
+            File dest = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            File file = new File(dest, "Infos.zip");
+            ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file));
+            ZipEntry entry = zipInputStream.getNextEntry();
+
+
+            while (entry != null) {
+                String fileName = entry.getName();
+                File newFile = new File(dest + File.separator + fileName);
+
+                new File(newFile.getParent()).mkdirs();
+
+                FileOutputStream fos = new FileOutputStream(newFile);
+
+                int i;
+                while ((i = zipInputStream.read(buffer)) > 0) {
+                    fos.write(buffer, 0, i);
+                }
+                fos.close();
+                entry = zipInputStream.getNextEntry();
+            }
+            zipInputStream.closeEntry();
+            zipInputStream.close();
+        } catch (IOException e) {
+            System.out.println("Erreur : " + e);
+        }
+        dataSource = new DataSource(getApplicationContext());
+        dataSource.open();
+        dataSource.initializeDatabase(getApplicationContext());
+    }
+
+    private void initializeSpinners(){
+        //Initializes spinners
+
+        if(!dataSource.equals(null)) {
+            final ArrayList<String> buses = dataSource.getBusesName();
+            final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, buses);
+            spinnerBus.setAdapter(listBusAdapter);
+
+            spinnerBus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    ArrayList<String> sens = dataSource.getSensForBus(buses.get(i));
+                    ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, sens);
+                    spinnerSens.setAdapter(listSensAdapter);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                }
+            });
+        }
+        else{
+            System.out.println("DataSource est null!!!");
+        }
     }
 }

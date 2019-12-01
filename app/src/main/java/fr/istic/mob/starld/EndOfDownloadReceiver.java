@@ -1,54 +1,25 @@
 package fr.istic.mob.starld;
 
+import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class EndOfDownloadReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        byte [] buffer = new byte [1024];
 
-        try {
-            File dest = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            File file = new File(dest, "Infos.zip");
-            ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file));
-            ZipEntry entry = zipInputStream.getNextEntry();
+        if (intent.getAction().equals("android.intent.action.DOWNLOAD_COMPLETE")) {
+            Intent downloadIntent = new Intent(context, MainActivity.class);
+            downloadIntent.putExtra("DLComplete", true);
+            downloadIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
 
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            stackBuilder.addNextIntent(downloadIntent);
 
-            while (entry != null) {
-                String fileName = entry.getName();
-                File newFile = new File(dest+File.separator+fileName);
-
-                new File (newFile.getParent()).mkdirs();
-
-                FileOutputStream fos = new FileOutputStream(newFile);
-
-                int i;
-                while ((i = zipInputStream.read(buffer)) > 0) {
-                    fos.write(buffer, 0, i);
-                }
-                fos.close();
-                entry = zipInputStream.getNextEntry();
-            }
-            zipInputStream.closeEntry();
-            zipInputStream.close();
+            stackBuilder.startActivities();
         }
-        catch (IOException e) {
-            System.out.println("Erreur : "+e);
-        }
-
-        DataSource dataSource = new DataSource(context);
-        dataSource.open();
-        dataSource.initializeDatabase();
     }
 }
+
