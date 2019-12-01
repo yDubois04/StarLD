@@ -104,8 +104,9 @@ public class MainActivity extends AppCompatActivity {
             }
             else if(getIntent().getExtras().getBoolean("DLComplete")){
                 unzip();
-            }
-            else if(getIntent().getExtras().getBoolean("DBFull")){
+                dataSource = new DataSource(getApplicationContext());
+                dataSource.open();
+                dataSource.initializeDatabase(getApplicationContext());
                 initializeSpinners();
             }
         }
@@ -153,9 +154,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             System.out.println("Erreur : " + e);
         }
-        dataSource = new DataSource(getApplicationContext());
-        dataSource.open();
-        dataSource.initializeDatabase(getApplicationContext());
     }
 
     private void initializeSpinners(){

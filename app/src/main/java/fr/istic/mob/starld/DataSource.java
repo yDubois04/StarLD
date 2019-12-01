@@ -41,20 +41,6 @@ public class DataSource {
         this.initializeTable("trips.txt", StarContract.Trips.CONTENT_PATH);
         this.initializeTable("calendar.txt", StarContract.Calendar.CONTENT_PATH);
         this.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
-
-
-        //Si on execute ce code, cela efface tout ce qui viens d'être fait...
-        /*
-        Intent downloadIntent = new Intent(context, MainActivity.class);
-        downloadIntent.putExtra("DBFull", true);
-        downloadIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addNextIntent(downloadIntent);
-
-        stackBuilder.startActivities();
-
-         */
     }
 
     public void updateDatabase (int i, int i1) {
