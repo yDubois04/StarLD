@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarDownload);
         calendar = GregorianCalendar.getInstance();
 
-       Constraints constraints = new Constraints.Builder().build();
+        Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
                         .setConstraints(constraints)
@@ -97,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        this.initializeSpinners();
+        dataSource = new DataSource(getApplicationContext());
+        dataSource.open();
 
         if(getIntent().getExtras() != null) {
             url = getIntent().getExtras().getString("url");
@@ -107,12 +108,11 @@ public class MainActivity extends AppCompatActivity {
             }
             else if(getIntent().getExtras().getBoolean("DLComplete")){
                 unzip();
-                dataSource = new DataSource(getApplicationContext());
-                dataSource.open();
                 dataSource.initializeDatabase();
-                initializeSpinners();
             }
         }
+
+        initializeSpinners();
     }
     public void startDownload(){
         Uri uri = Uri.parse(url);
@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeSpinners(){
+        //Initializes spinners
 
         if(!dataSource.equals(null)) {
             final ArrayList<BusRoute> buses = dataSource.getBusesName();
@@ -180,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         else{
-            System.out.println("DataSource est null");
+            System.out.println("DataSource est null!!!");
         }
     }
 }
