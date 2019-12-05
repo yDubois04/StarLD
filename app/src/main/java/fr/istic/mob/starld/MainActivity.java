@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        dataSource = new DataSource(getApplicationContext());
+        dataSource.open();
 
         if(getIntent().getExtras() != null) {
             url = getIntent().getExtras().getString("url");
@@ -104,12 +106,11 @@ public class MainActivity extends AppCompatActivity {
             }
             else if(getIntent().getExtras().getBoolean("DLComplete")){
                 unzip();
-                dataSource = new DataSource(getApplicationContext());
-                dataSource.open();
                 dataSource.initializeDatabase(getApplicationContext());
-                initializeSpinners();
             }
         }
+
+        initializeSpinners();
     }
     public void startDownload(){
         Uri uri = Uri.parse(url);
