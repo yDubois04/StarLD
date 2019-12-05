@@ -1,8 +1,6 @@
 package fr.istic.mob.starld;
 
-import android.app.TaskStackBuilder;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -12,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import fr.istic.mob.starld.fr.istic.mob.starld.model.BusRoute;
 
 public class DataSource {
 
@@ -34,7 +34,7 @@ public class DataSource {
         database.close();
     }
 
-    public void initializeDatabase (Context context) {
+    public void initializeDatabase () {
         this.clearDatabase ();
         this.initializeTable("routes.txt", StarContract.BusRoutes.CONTENT_PATH);
         this.initializeTable("stops.txt", StarContract.Stops.CONTENT_PATH);
@@ -163,16 +163,18 @@ public class DataSource {
         return requete;
     }
 
-    public ArrayList<String> getBusesName () {
-        ArrayList<String> ret = new ArrayList<>();
+    public ArrayList<BusRoute> getBusesName () {
+        ArrayList<BusRoute> ret = new ArrayList<>();
 
-        String req = "SELECT "+ StarContract.BusRoutes.BusRouteColumns.SHORT_NAME +" FROM "+StarContract.BusRoutes.CONTENT_PATH;
+        String req = "SELECT * FROM "+StarContract.BusRoutes.CONTENT_PATH;
         Cursor cursor = database.rawQuery(req,null);
         cursor.moveToFirst();
 
         while (!cursor.isAfterLast()) {
             String busName = cursor.getString(0);
-            ret.add(busName);
+            BusRoute bus = new BusRoute(cursor.getInt(0), cursor.getString(1), cursor.getString(2),
+                                        cursor.getString(3), cursor.getInt(4), cursor.getString(5), cursor.getString(6));
+            ret.add(bus);
             cursor.moveToNext();
         }
         cursor.close();
@@ -201,6 +203,8 @@ public class DataSource {
         String req = "SELECT "+ StarContract.BusRoutes.BusRouteColumns.LONG_NAME +
                      " FROM "+StarContract.BusRoutes.CONTENT_PATH+
                      " WHERE "+StarContract.BusRoutes.BusRouteColumns.SHORT_NAME +" = \""+busName+"\"";
+
+        System.out.println(req);
 
         Cursor cursor = database.rawQuery(req,null);
         cursor.moveToFirst();

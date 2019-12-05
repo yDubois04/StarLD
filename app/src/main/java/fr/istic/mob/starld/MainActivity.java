@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
+import fr.istic.mob.starld.fr.istic.mob.starld.model.BusRoute;
+
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;;
 import android.app.TimePickerDialog;
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarDownload);
         calendar = GregorianCalendar.getInstance();
 
-        Constraints constraints = new Constraints.Builder().build();
+       Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
                         .setConstraints(constraints)
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        this.initializeSpinners();
 
         if(getIntent().getExtras() != null) {
             url = getIntent().getExtras().getString("url");
@@ -106,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 unzip();
                 dataSource = new DataSource(getApplicationContext());
                 dataSource.open();
-                dataSource.initializeDatabase(getApplicationContext());
+                dataSource.initializeDatabase();
                 initializeSpinners();
             }
         }
@@ -157,17 +160,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeSpinners(){
-        //Initializes spinners
 
         if(!dataSource.equals(null)) {
-            final ArrayList<String> buses = dataSource.getBusesName();
-            final ArrayAdapter<String> listBusAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, buses);
-            spinnerBus.setAdapter(listBusAdapter);
+            final ArrayList<BusRoute> buses = dataSource.getBusesName();
+            SpinnerAdapter adapter = new SpinnerAdapter(buses, getApplicationContext());
+            spinnerBus.setAdapter(adapter);
 
             spinnerBus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    ArrayList<String> sens = dataSource.getSensForBus(buses.get(i));
+                    ArrayList<String> sens = dataSource.getSensForBus(buses.get(i).getShortName());
                     ArrayAdapter<String> listSensAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, sens);
                     spinnerSens.setAdapter(listSensAdapter);
                 }
@@ -178,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         else{
-            System.out.println("DataSource est null!!!");
+            System.out.println("DataSource est null");
         }
     }
 }
