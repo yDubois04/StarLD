@@ -1,4 +1,4 @@
-package fr.istic.mob.starld.fr.istic.mob.starld.model;
+package fr.istic.mob.starld.model;
 
 public class Calendar {
 

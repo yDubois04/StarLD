@@ -10,7 +10,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.istic.mob.starld.fr.istic.mob.starld.model.BusRoute;
+import fr.istic.mob.starld.model.BusRoute;
 
 public class SpinnerAdapter extends BaseAdapter {
 

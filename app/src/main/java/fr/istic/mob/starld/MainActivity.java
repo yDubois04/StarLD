@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import fr.istic.mob.starld.fr.istic.mob.starld.model.BusRoute;
+import fr.istic.mob.starld.model.BusRoute;
 
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;;

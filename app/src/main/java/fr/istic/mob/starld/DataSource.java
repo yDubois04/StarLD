@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import fr.istic.mob.starld.fr.istic.mob.starld.model.BusRoute;
+import fr.istic.mob.starld.model.BusRoute;
 
 public class DataSource {
 
