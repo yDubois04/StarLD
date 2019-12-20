@@ -181,20 +181,12 @@ public class DataSource {
         return ret;
     }
 
-    public ArrayList<String> getBusesColor () {
-        ArrayList<String> ret = new ArrayList<>();
-
-        String req = "SELECT "+ StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR +" FROM "+StarContract.BusRoutes.CONTENT_PATH;
+    public Cursor getBuses () {
+        String req = "SELECT * FROM "+StarContract.BusRoutes.CONTENT_PATH;
         Cursor cursor = database.rawQuery(req,null);
         cursor.moveToFirst();
 
-        while (!cursor.isAfterLast()) {
-            String busColor = cursor.getString(0);
-            ret.add(busColor);
-            cursor.moveToNext();
-        }
-        cursor.close();
-        return ret;
+        return cursor;
     }
 
     public ArrayList<String> getSensForBus (String busName) {
