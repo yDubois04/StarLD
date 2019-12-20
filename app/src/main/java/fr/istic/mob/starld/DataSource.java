@@ -184,8 +184,6 @@ public class DataSource {
     public Cursor getBuses () {
         String req = "SELECT * FROM "+StarContract.BusRoutes.CONTENT_PATH;
         Cursor cursor = database.rawQuery(req,null);
-        cursor.moveToFirst();
-
         return cursor;
     }
 
