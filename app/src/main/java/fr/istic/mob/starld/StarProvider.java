@@ -6,10 +6,9 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 
-import java.net.URI;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import fr.istic.mob.starld.database.DataSource;
 
 public class StarProvider extends ContentProvider {
 

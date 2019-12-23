@@ -1,4 +1,4 @@
-package fr.istic.mob.starld;
+package fr.istic.mob.starld.database;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import fr.istic.mob.starld.StarContract;
 import fr.istic.mob.starld.model.BusRoute;
 
 public class DataSource {

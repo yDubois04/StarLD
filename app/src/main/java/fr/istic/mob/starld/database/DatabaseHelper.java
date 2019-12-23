@@ -1,9 +1,11 @@
-package fr.istic.mob.starld;
+package fr.istic.mob.starld.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import fr.istic.mob.starld.StarContract;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
