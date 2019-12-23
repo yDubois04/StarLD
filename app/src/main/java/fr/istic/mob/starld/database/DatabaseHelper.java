@@ -14,7 +14,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_ROUTE =
             "CREATE TABLE IF NOT EXISTS " + StarContract.BusRoutes.CONTENT_PATH+
-                    "("+StarContract.BusRoutes.BusRouteColumns._ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                    "("+StarContract.BusRoutes.BusRouteColumns._ID +" INTEGER PRIMARY KEY,"+
                     StarContract.BusRoutes.BusRouteColumns.SHORT_NAME + " TEXT, "+
                     StarContract.BusRoutes.BusRouteColumns.LONG_NAME + " TEXT, "+
                     StarContract.BusRoutes.BusRouteColumns.DESCRIPTION + " TEXT, "+
@@ -24,7 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_TRIP =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.Trips.CONTENT_PATH +
-                    "("+StarContract.Trips.TripColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    "("+StarContract.Trips.TripColumns._ID + " INTEGER PRIMARY KEY, "+
                         StarContract.Trips.TripColumns.ROUTE_ID+ " INTEGER,"+
                         StarContract.Trips.TripColumns.SERVICE_ID+ " INTEGER,"+
                         StarContract.Trips.TripColumns.HEADSIGN+ " TEXT,"+
@@ -34,7 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_STOP =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.Stops.CONTENT_PATH+
-                    "("+StarContract.Stops.StopColumns._ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    "("+StarContract.Stops.StopColumns._ID +" INTEGER PRIMARY KEY, "+
                         StarContract.Stops.StopColumns.NAME + " TEXT, "+
                         StarContract.Stops.StopColumns.DESCRIPTION + " TEXT, "+
                         StarContract.Stops.StopColumns.LATITUDE + " TEXT, "+
@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_STOP_TIME =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.StopTimes.CONTENT_PATH+
-                    "("+StarContract.StopTimes.StopTimeColumns._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    "("+StarContract.StopTimes.StopTimeColumns._ID+ " INTEGER PRIMARY KEY, "+
                         StarContract.StopTimes.StopTimeColumns.TRIP_ID + " INTEGER, "+
                         StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " TEXT, "+
                         StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME + " TEXT, "+

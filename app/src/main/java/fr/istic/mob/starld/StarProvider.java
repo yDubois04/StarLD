@@ -49,9 +49,11 @@ public class StarProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] strings, @Nullable String s, @Nullable String[] strings1, @Nullable String s1) {
         Cursor c = null;
-        //Ajouter une condition par uri en fonction des besoins
         if (URI_MATCHER.match(uri) == QUERY_BUS) {
             c = dataSource.getBuses();
+        }
+        else if (URI_MATCHER.match(uri) == QUERY_STOPS) {
+            c = dataSource.getStops ();
         }
         return c;
     }
