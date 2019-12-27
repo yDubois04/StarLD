@@ -49,14 +49,14 @@ public class StarProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, @Nullable String[] strings, @Nullable String s, @Nullable String[] strings1, @Nullable String s1) {
+    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
         Cursor c = null;
         System.out.println("match "+URI_MATCHER.match(uri));
         if (URI_MATCHER.match(uri) == QUERY_BUS) {
             c = dataSource.getBuses();
         }
         else if (URI_MATCHER.match(uri) == QUERY_STOPS) {
-            c = dataSource.getStops (s);
+            c = dataSource.getStops (selection, sortOrder);
         }
         return c;
     }
