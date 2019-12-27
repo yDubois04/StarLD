@@ -38,8 +38,8 @@ public class DataSource {
         this.clearDatabase ();
         this.initializeTable("routes.txt", StarContract.BusRoutes.CONTENT_PATH);
         this.initializeTable("stops.txt", StarContract.Stops.CONTENT_PATH);
-        this.initializeTable("trips.txt", StarContract.Trips.CONTENT_PATH);
         this.initializeTable("calendar.txt", StarContract.Calendar.CONTENT_PATH);
+        this.initializeTable("trips.txt", StarContract.Trips.CONTENT_PATH);
         this.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
     }
 
@@ -141,7 +141,8 @@ public class DataSource {
         else if (tableName.equals(StarContract.Trips.CONTENT_PATH)) {
             requete = "INSERT INTO "+ StarContract.Trips.CONTENT_PATH +
                     "(" + StarContract.Trips.TripColumns._ID+", "+
-                    StarContract.Trips.TripColumns.ROUTE_ID+ ","+ StarContract.Trips.TripColumns.SERVICE_ID+ ","+
+                    StarContract.Trips.TripColumns.ROUTE_ID+ ","+
+                    StarContract.Trips.TripColumns.SERVICE_ID+ ","+
                     StarContract.Trips.TripColumns.HEADSIGN+ ","+ StarContract.Trips.TripColumns.DIRECTION_ID+ ","+
                     StarContract.Trips.TripColumns.BLOCK_ID+ ","+ StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+ ") VALUES (?,?,?,?,?,?,?)";
         }
@@ -174,10 +175,25 @@ public class DataSource {
         return cursor;
     }
 
-    public Cursor getStops () {
-        String req = "SELECT * FROM "+StarContract.Stops.CONTENT_PATH;
+    public Cursor getStops (String idBus) {
+        String req = "SELECT DISTINCT "+StarContract.Stops.StopColumns.NAME
+                +" FROM " +StarContract.Stops.CONTENT_PATH
+                +" INNER JOIN "+StarContract.StopTimes.CONTENT_PATH +" on "+StarContract.StopTimes.StopTimeColumns.STOP_ID + " = "+StarContract.Stops.CONTENT_PATH+"."+StarContract.Stops.StopColumns._ID
+                +" INNER JOIN "+StarContract.Trips.CONTENT_PATH+ " on "+StarContract.Trips.CONTENT_PATH+"."+StarContract.Trips.TripColumns._ID + " = "+StarContract.StopTimes.StopTimeColumns.TRIP_ID
+                +" INNER JOIN "+StarContract.BusRoutes.CONTENT_PATH+" on "+StarContract.BusRoutes.CONTENT_PATH+"."+StarContract.BusRoutes.BusRouteColumns._ID+ " = "+StarContract.Trips.TripColumns.ROUTE_ID
+                +" WHERE "+StarContract.BusRoutes.CONTENT_PATH+"."+StarContract.BusRoutes.BusRouteColumns._ID+ " = "+Integer.parseInt(idBus);
         Cursor cursor = database.rawQuery(req,null);
+        afficher(cursor);
         return cursor;
+    }
+
+    private void afficher (Cursor cursor) {
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            String stop = cursor.getString(0);
+            System.out.println(stop);
+            cursor.moveToNext();
+        }
     }
 
 }

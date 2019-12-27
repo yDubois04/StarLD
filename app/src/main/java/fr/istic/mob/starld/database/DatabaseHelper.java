@@ -30,7 +30,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         StarContract.Trips.TripColumns.HEADSIGN+ " TEXT,"+
                         StarContract.Trips.TripColumns.DIRECTION_ID+ " INTEGER,"+
                         StarContract.Trips.TripColumns.BLOCK_ID+ " TEXT,"+
-                        StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+ " INTEGER)";
+                        StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+ " INTEGER," +
+                        " FOREIGN KEY ("+StarContract.Trips.TripColumns.ROUTE_ID +") REFERENCES "+StarContract.BusRoutes.CONTENT_PATH+" ("+StarContract.BusRoutes.BusRouteColumns._ID + "))";
 
     private static final String CREATE_TABLE_STOP =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.Stops.CONTENT_PATH+
@@ -48,7 +49,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " TEXT, "+
                         StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME + " TEXT, "+
                         StarContract.StopTimes.StopTimeColumns.STOP_ID+ " INTEGER, "+
-                        StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE+ " INTEGER) ";
+                        StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE+ " INTEGER, "+
+                        " FOREIGN KEY ("+StarContract.StopTimes.StopTimeColumns.STOP_ID +") REFERENCES "+StarContract.Stops.CONTENT_PATH+" ("+StarContract.Stops.StopColumns._ID + "),"+
+                        " FOREIGN KEY ("+StarContract.StopTimes.StopTimeColumns.TRIP_ID +") REFERENCES "+StarContract.Trips.CONTENT_PATH+" ("+StarContract.Trips.TripColumns._ID + "))";
 
     private static final String CREATE_TABLE_CALENDAR =
             "CREATE TABLE IF NOT EXISTS "+StarContract.Calendar.CONTENT_PATH+
@@ -70,10 +73,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_TABLE_ROUTE);
-        sqLiteDatabase.execSQL(CREATE_TABLE_TRIP);
         sqLiteDatabase.execSQL(CREATE_TABLE_STOP);
-        sqLiteDatabase.execSQL(CREATE_TABLE_STOP_TIME);
         sqLiteDatabase.execSQL(CREATE_TABLE_CALENDAR);
+        sqLiteDatabase.execSQL(CREATE_TABLE_TRIP);
+        sqLiteDatabase.execSQL(CREATE_TABLE_STOP_TIME);
     }
 
     @Override

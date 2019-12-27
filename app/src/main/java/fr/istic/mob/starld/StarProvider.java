@@ -6,6 +6,8 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.net.URI;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import fr.istic.mob.starld.database.DataSource;
@@ -49,11 +51,12 @@ public class StarProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] strings, @Nullable String s, @Nullable String[] strings1, @Nullable String s1) {
         Cursor c = null;
+        System.out.println("match "+URI_MATCHER.match(uri));
         if (URI_MATCHER.match(uri) == QUERY_BUS) {
             c = dataSource.getBuses();
         }
         else if (URI_MATCHER.match(uri) == QUERY_STOPS) {
-            c = dataSource.getStops ();
+            c = dataSource.getStops (s);
         }
         return c;
     }

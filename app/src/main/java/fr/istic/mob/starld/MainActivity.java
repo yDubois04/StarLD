@@ -5,13 +5,11 @@ import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import fr.istic.mob.starld.database.DataSource;
-
 import android.app.DownloadManager;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,19 +21,14 @@ import java.util.zip.ZipInputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button validate;
     ProgressBar progressBar;
     String url;
-
     DataSource dataSource;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
-        validate = findViewById(R.id.buttonValidate);
         progressBar = findViewById(R.id.progressBarDownload);
 
         Constraints constraints = new Constraints.Builder().build();
