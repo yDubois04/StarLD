@@ -1,9 +1,11 @@
-package fr.istic.mob.starld;
+package fr.istic.mob.starld.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import fr.istic.mob.starld.StarContract;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -12,7 +14,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_ROUTE =
             "CREATE TABLE IF NOT EXISTS " + StarContract.BusRoutes.CONTENT_PATH+
-                    "("+StarContract.BusRoutes.BusRouteColumns._ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                    "("+StarContract.BusRoutes.BusRouteColumns._ID +" INTEGER PRIMARY KEY,"+
                     StarContract.BusRoutes.BusRouteColumns.SHORT_NAME + " TEXT, "+
                     StarContract.BusRoutes.BusRouteColumns.LONG_NAME + " TEXT, "+
                     StarContract.BusRoutes.BusRouteColumns.DESCRIPTION + " TEXT, "+
@@ -22,17 +24,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_TRIP =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.Trips.CONTENT_PATH +
-                    "("+StarContract.Trips.TripColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    "("+StarContract.Trips.TripColumns._ID + " INTEGER PRIMARY KEY, "+
                         StarContract.Trips.TripColumns.ROUTE_ID+ " INTEGER,"+
                         StarContract.Trips.TripColumns.SERVICE_ID+ " INTEGER,"+
                         StarContract.Trips.TripColumns.HEADSIGN+ " TEXT,"+
                         StarContract.Trips.TripColumns.DIRECTION_ID+ " INTEGER,"+
                         StarContract.Trips.TripColumns.BLOCK_ID+ " TEXT,"+
-                        StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+ " INTEGER)";
+                        StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+ " INTEGER," +
+                        " FOREIGN KEY ("+StarContract.Trips.TripColumns.ROUTE_ID +") REFERENCES "+StarContract.BusRoutes.CONTENT_PATH+" ("+StarContract.BusRoutes.BusRouteColumns._ID + "))";
 
     private static final String CREATE_TABLE_STOP =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.Stops.CONTENT_PATH+
-                    "("+StarContract.Stops.StopColumns._ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    "("+StarContract.Stops.StopColumns._ID +" INTEGER PRIMARY KEY, "+
                         StarContract.Stops.StopColumns.NAME + " TEXT, "+
                         StarContract.Stops.StopColumns.DESCRIPTION + " TEXT, "+
                         StarContract.Stops.StopColumns.LATITUDE + " TEXT, "+
@@ -41,12 +44,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_STOP_TIME =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.StopTimes.CONTENT_PATH+
-                    "("+StarContract.StopTimes.StopTimeColumns._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    "("+StarContract.StopTimes.StopTimeColumns._ID+ " INTEGER PRIMARY KEY, "+
                         StarContract.StopTimes.StopTimeColumns.TRIP_ID + " INTEGER, "+
                         StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " TEXT, "+
                         StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME + " TEXT, "+
                         StarContract.StopTimes.StopTimeColumns.STOP_ID+ " INTEGER, "+
-                        StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE+ " INTEGER) ";
+                        StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE+ " INTEGER, "+
+                        " FOREIGN KEY ("+StarContract.StopTimes.StopTimeColumns.STOP_ID +") REFERENCES "+StarContract.Stops.CONTENT_PATH+" ("+StarContract.Stops.StopColumns._ID + "),"+
+                        " FOREIGN KEY ("+StarContract.StopTimes.StopTimeColumns.TRIP_ID +") REFERENCES "+StarContract.Trips.CONTENT_PATH+" ("+StarContract.Trips.TripColumns._ID + "))";
 
     private static final String CREATE_TABLE_CALENDAR =
             "CREATE TABLE IF NOT EXISTS "+StarContract.Calendar.CONTENT_PATH+
@@ -68,10 +73,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_TABLE_ROUTE);
-        sqLiteDatabase.execSQL(CREATE_TABLE_TRIP);
         sqLiteDatabase.execSQL(CREATE_TABLE_STOP);
-        sqLiteDatabase.execSQL(CREATE_TABLE_STOP_TIME);
         sqLiteDatabase.execSQL(CREATE_TABLE_CALENDAR);
+        sqLiteDatabase.execSQL(CREATE_TABLE_TRIP);
+        sqLiteDatabase.execSQL(CREATE_TABLE_STOP_TIME);
     }
 
     @Override
