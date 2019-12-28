@@ -23,6 +23,11 @@
             </intent-filter>
         </receiver>
 
+        <provider
+            android:name=".StarContentProvider"
+            android:authorities="fr.istic.starproviderGH"
+            android:exported="true"/>
+
         <activity android:name=".MainActivity" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

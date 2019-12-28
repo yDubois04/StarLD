@@ -52,7 +52,7 @@ public class DownloadWorker extends Worker {
     public Result doWork() {
         //Get current date
         Date date = new Date();
-        
+
         String jsonResult = getJsonFromUrl();
         String lastJSONString = getStringSaved("JSONResult.txt");
 
