@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
-                new PeriodicWorkRequest.Builder(DownloadWorker.class, 15, TimeUnit.MINUTES)
+                new PeriodicWorkRequest.Builder(DownloadWorker.class, 1, TimeUnit.DAYS)
                         .setConstraints(constraints)
                         .build();
 
