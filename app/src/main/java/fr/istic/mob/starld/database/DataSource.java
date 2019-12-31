@@ -177,7 +177,7 @@ public class DataSource {
     }
 
     public Cursor getStops (String idBus, String sort) {
-        String req = "SELECT *"
+        String req = "SELECT DISTINCT "+StarContract.Stops.CONTENT_PATH+".*"
                 +" FROM " +StarContract.Stops.CONTENT_PATH
                 +" INNER JOIN "+StarContract.StopTimes.CONTENT_PATH +" on "+StarContract.StopTimes.StopTimeColumns.STOP_ID + " = "+StarContract.Stops.CONTENT_PATH+"."+StarContract.Stops.StopColumns._ID
                 +" INNER JOIN "+StarContract.Trips.CONTENT_PATH+ " on "+StarContract.Trips.CONTENT_PATH+"."+StarContract.Trips.TripColumns._ID + " = "+StarContract.StopTimes.StopTimeColumns.TRIP_ID
@@ -189,11 +189,14 @@ public class DataSource {
         return cursor;
     }
 
-    public Cursor getStops (String nameStop) {
+    public Cursor getBusesForAStop (String nameStop) {
 
-        String req = "SELECT DISTINCT "+StarContract.Stops.StopColumns.DESCRIPTION
-                    +" FROM "+StarContract.Stops.CONTENT_PATH
-                    +" WHERE "+StarContract.Stops.StopColumns.NAME +" = \""+nameStop+"\"";
+        String req = "SELECT DISTINCT "+StarContract.BusRoutes.CONTENT_PATH+".*, "+StarContract.Stops.StopColumns.NAME
+                +" FROM " +StarContract.BusRoutes.CONTENT_PATH
+                +" INNER JOIN "+ StarContract.Trips.CONTENT_PATH+ " ON " + StarContract.BusRoutes.CONTENT_PATH+"."+StarContract.BusRoutes.BusRouteColumns._ID+" = "+StarContract.Trips.TripColumns.ROUTE_ID
+                +" INNER JOIN "+ StarContract.StopTimes.CONTENT_PATH+ " ON "+StarContract.Trips.CONTENT_PATH+"."+StarContract.Trips.TripColumns._ID+" = "+StarContract.StopTimes.StopTimeColumns.TRIP_ID
+                +" INNER JOIN "+ StarContract.Stops.CONTENT_PATH+" ON "+StarContract.Stops.CONTENT_PATH+"."+StarContract.Stops.StopColumns._ID+" = "+StarContract.StopTimes.StopTimeColumns.STOP_ID
+                +" WHERE "+ StarContract.Stops.StopColumns.NAME +" LIKE \"%"+nameStop+"%\"";
 
         Cursor cursor = database.rawQuery(req,null);
         return cursor;

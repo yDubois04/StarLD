@@ -61,7 +61,7 @@ public class StarProvider extends ContentProvider {
             c = dataSource.getStops (selection, sortOrder);
         }
         else if (URI_MATCHER.match(uri) == QUERY_SEARCH) {
-            c = dataSource.getStops(selection);
+            c = dataSource.getBusesForAStop(selection);
         }
         return c;
     }
