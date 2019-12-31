@@ -25,6 +25,7 @@ public class StarProvider extends ContentProvider {
     private static final int QUERY_STIMES_BY_ID = 8;
     private static final int QUERY_CALENDAR = 9;
     private static final int QUERY_CALENDAR_BY_ID = 10;
+    private static final int QUERY_SEARCH = 11;
     private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.BusRoutes.CONTENT_PATH, QUERY_BUS);
@@ -37,6 +38,8 @@ public class StarProvider extends ContentProvider {
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.StopTimes.CONTENT_PATH+"/#", QUERY_STIMES_BY_ID);
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.Calendar.CONTENT_PATH, QUERY_CALENDAR);
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.Calendar.CONTENT_PATH+"/#", QUERY_CALENDAR_BY_ID);
+        URI_MATCHER.addURI(StarContract.AUTHORITY,"search", QUERY_SEARCH);
+
     }
 
 
@@ -51,12 +54,14 @@ public class StarProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
         Cursor c = null;
-        System.out.println("match "+URI_MATCHER.match(uri));
         if (URI_MATCHER.match(uri) == QUERY_BUS) {
             c = dataSource.getBuses();
         }
         else if (URI_MATCHER.match(uri) == QUERY_STOPS) {
             c = dataSource.getStops (selection, sortOrder);
+        }
+        else if (URI_MATCHER.match(uri) == QUERY_SEARCH) {
+            c = dataSource.getStops(selection);
         }
         return c;
     }

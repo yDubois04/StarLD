@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 
 import androidx.work.Operation;
 import fr.istic.mob.starld.StarContract;
+import fr.istic.mob.starld.model.Stop;
 
 public class DataSource {
 
@@ -176,20 +177,23 @@ public class DataSource {
     }
 
     public Cursor getStops (String idBus, String sort) {
-        String req = "SELECT DISTINCT "+ StarContract.Stops.StopColumns.NAME
+        String req = "SELECT *"
                 +" FROM " +StarContract.Stops.CONTENT_PATH
                 +" INNER JOIN "+StarContract.StopTimes.CONTENT_PATH +" on "+StarContract.StopTimes.StopTimeColumns.STOP_ID + " = "+StarContract.Stops.CONTENT_PATH+"."+StarContract.Stops.StopColumns._ID
                 +" INNER JOIN "+StarContract.Trips.CONTENT_PATH+ " on "+StarContract.Trips.CONTENT_PATH+"."+StarContract.Trips.TripColumns._ID + " = "+StarContract.StopTimes.StopTimeColumns.TRIP_ID
-                +" INNER JOIN "+StarContract.BusRoutes.CONTENT_PATH+" on "+StarContract.BusRoutes.CONTENT_PATH+"."+StarContract.BusRoutes.BusRouteColumns._ID+ " = "+StarContract.Trips.TripColumns.ROUTE_ID
-                +" WHERE "+StarContract.BusRoutes.CONTENT_PATH+"."+StarContract.BusRoutes.BusRouteColumns._ID+ " = "+Integer.parseInt(idBus)
-                +" ORDER BY " +StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME;
+                +" WHERE "+StarContract.Trips.TripColumns.ROUTE_ID+" = "+Integer.parseInt(idBus)
+                +" AND "+StarContract.Trips.TripColumns.DIRECTION_ID +" = "+Integer.parseInt(sort)
+                +" ORDER BY "+StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " ASC ";
 
-                if (sort.equals("0")) {
-                    req += " DESC";
-                }
-                else {
-                    req += " ASC ";
-                }
+        Cursor cursor = database.rawQuery(req,null);
+        return cursor;
+    }
+
+    public Cursor getStops (String nameStop) {
+
+        String req = "SELECT DISTINCT "+StarContract.Stops.StopColumns.DESCRIPTION
+                    +" FROM "+StarContract.Stops.CONTENT_PATH
+                    +" WHERE "+StarContract.Stops.StopColumns.NAME +" = \""+nameStop+"\"";
 
         Cursor cursor = database.rawQuery(req,null);
         return cursor;

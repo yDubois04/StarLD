@@ -38,8 +38,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     "("+StarContract.Stops.StopColumns._ID +" INTEGER PRIMARY KEY, "+
                         StarContract.Stops.StopColumns.NAME + " TEXT, "+
                         StarContract.Stops.StopColumns.DESCRIPTION + " TEXT, "+
-                        StarContract.Stops.StopColumns.LATITUDE + " TEXT, "+
-                        StarContract.Stops.StopColumns.LONGITUDE +  " TEXT, "+
+                        StarContract.Stops.StopColumns.LATITUDE + " REAL, "+
+                        StarContract.Stops.StopColumns.LONGITUDE +  " REAL, "+
                         StarContract.Stops.StopColumns.WHEELCHAIR_BOARDING + " INTEGER)";
 
     private static final String CREATE_TABLE_STOP_TIME =
