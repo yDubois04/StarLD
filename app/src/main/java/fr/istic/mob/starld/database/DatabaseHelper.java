@@ -31,7 +31,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         StarContract.Trips.TripColumns.DIRECTION_ID+ " INTEGER,"+
                         StarContract.Trips.TripColumns.BLOCK_ID+ " TEXT,"+
                         StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+ " INTEGER," +
-                        " FOREIGN KEY ("+StarContract.Trips.TripColumns.ROUTE_ID +") REFERENCES "+StarContract.BusRoutes.CONTENT_PATH+" ("+StarContract.BusRoutes.BusRouteColumns._ID + "))";
+                        " FOREIGN KEY ("+StarContract.Trips.TripColumns.ROUTE_ID +") REFERENCES "+StarContract.BusRoutes.CONTENT_PATH+" ("+StarContract.BusRoutes.BusRouteColumns._ID + ")," +
+                        " FOREIGN KEY ("+StarContract.Trips.TripColumns.SERVICE_ID+") REFERENCES "+StarContract.Calendar.CONTENT_PATH+ "("+StarContract.Calendar.CalendarColumns._ID +"))";
 
     private static final String CREATE_TABLE_STOP =
             "CREATE TABLE IF NOT EXISTS "+ StarContract.Stops.CONTENT_PATH+

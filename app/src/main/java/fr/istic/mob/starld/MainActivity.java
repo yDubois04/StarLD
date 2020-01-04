@@ -5,16 +5,24 @@ import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import fr.istic.mob.starld.database.DataSource;
+
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.database.Cursor;
+import android.icu.text.UnicodeSetSpanner;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.ProgressBar;
+import android.widget.Toast;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -30,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         progressBar = findViewById(R.id.progressBarDownload);
+        progressBar.setMax(100);
 
         Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
@@ -51,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else if(getIntent().getExtras().getBoolean("DLComplete")){
                 unzip();
-                dataSource.initializeDatabase();
+                new AsyncTaskCreateBD().execute();
             }
         }
     }
@@ -97,6 +106,49 @@ public class MainActivity extends AppCompatActivity {
             zipInputStream.close();
         } catch (IOException e) {
             System.out.println("Erreur : " + e);
+        }
+    }
+
+    class AsyncTaskCreateBD extends AsyncTask <Void, Integer, String> {
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            dataSource.clearDatabase();
+            int count = 5;
+            publishProgress(count);
+
+            count = 20;
+            publishProgress(count);
+            dataSource.initializeTable("routes.txt", StarContract.BusRoutes.CONTENT_PATH);
+
+            count = 35;
+            publishProgress(count);
+            dataSource.initializeTable("stops.txt", StarContract.Stops.CONTENT_PATH);
+
+            count = 55;
+            publishProgress(count);
+            dataSource.initializeTable("calendar.txt", StarContract.Calendar.CONTENT_PATH);
+
+            count = 65;
+            publishProgress(count);
+            dataSource.initializeTable("trips.txt", StarContract.Trips.CONTENT_PATH);
+
+            count = 80;
+            publishProgress(count);
+            dataSource.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
+
+            return (getString(R.string.toast_download));
+        }
+
+        @Override
+        protected void onProgressUpdate (Integer... diff) {
+            progressBar.incrementProgressBy(diff [0]);
+        }
+
+        @Override
+        protected void onPostExecute (String message) {
+            Toast.makeText(getApplicationContext(),message, Toast.LENGTH_SHORT).show();
+            progressBar.incrementProgressBy(100);
         }
     }
 }

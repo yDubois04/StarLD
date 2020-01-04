@@ -6,4 +6,6 @@
     <string name="button_validate">Valider</string>
     <string name="date_tv">Date</string>
     <string name="hour_tv">Heure</string>
+    <string name="toast_download">Téléchargement terminé</string>
+    <string name="toast_download_failed">Le téléchargement a été interrompu</string>
 </resources>
