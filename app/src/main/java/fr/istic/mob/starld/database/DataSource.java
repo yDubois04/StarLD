@@ -196,12 +196,25 @@ public class DataSource {
 
     public Cursor getSchedules(String schedule, int tripId) {
 
-        String req = "SELECT DISTINCT " + StarContract.Stops.StopColumns.NAME + " , " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME
+        String req = "SELECT DISTINCT " + StarContract.Stops.CONTENT_PATH+"."+StarContract.Stops.StopColumns._ID+","+StarContract.Stops.StopColumns.NAME + " , " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME
                 + " FROM " + StarContract.Stops.CONTENT_PATH
                 + " INNER JOIN " + StarContract.StopTimes.CONTENT_PATH + " ON " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID + " = " + StarContract.StopTimes.StopTimeColumns.STOP_ID
                 + " WHERE " + StarContract.StopTimes.StopTimeColumns.TRIP_ID + " = " + tripId
                 + " AND " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " > \"" + schedule + "\""
-                + " ORDER BY " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " DESC ";
+                + " ORDER BY " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " ASC ";
+
+        Cursor cursor = database.rawQuery(req, null);
+        return cursor;
+    }
+
+    public Cursor getSchedulesForAStop (int stopId, int busRouteId, int sens) {
+        String req = "SELECT "+StarContract.StopTimes.CONTENT_PATH+".*"
+                +   " FROM "+StarContract.StopTimes.CONTENT_PATH
+                +   " INNER JOIN "+StarContract.Trips.CONTENT_PATH+ " ON "+ StarContract.Trips.CONTENT_PATH+"."+StarContract.Trips.TripColumns._ID+" = "+StarContract.StopTimes.StopTimeColumns.TRIP_ID
+                +   " WHERE "+StarContract.StopTimes.StopTimeColumns.STOP_ID +" = "+stopId
+                +   " AND "+StarContract.Trips.TripColumns.ROUTE_ID +" = "+busRouteId
+                +   " AND "+StarContract.Trips.TripColumns.DIRECTION_ID + " = "+sens
+                +   " ORDER BY "+StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME;
 
         Cursor cursor = database.rawQuery(req, null);
         return cursor;

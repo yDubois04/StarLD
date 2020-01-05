@@ -51,7 +51,13 @@ public class StarProvider extends ContentProvider {
             c = dataSource.getBusesForAStop(selection);
         }
         else if (URI_MATCHER.match(uri) == QUERY_ROUTE_DETAILS) {
-            c = dataSource.getSchedules(selection, Integer.valueOf(sortOrder));
+            c = dataSource.getSchedules(sortOrder, Integer.valueOf(selection));
+        }
+        else if (URI_MATCHER.match(uri) == QUERY_STIMES) {
+            int stopId = Integer.valueOf(selectionArgs[0]);
+            int busRouteId = Integer.valueOf(selectionArgs[1]);
+            int sens = Integer.valueOf(selectionArgs[2]);
+            c = dataSource.getSchedulesForAStop(stopId,busRouteId,sens);
         }
         return c;
     }
