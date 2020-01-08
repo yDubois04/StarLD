@@ -207,13 +207,17 @@ public class DataSource {
         return cursor;
     }
 
-    public Cursor getSchedulesForAStop (int stopId, int busRouteId, int sens) {
+    public Cursor getSchedulesForAStop (int stopId, int busRouteId, int sens, String day, String hour) {
+
         String req = "SELECT "+StarContract.StopTimes.CONTENT_PATH+".*"
                 +   " FROM "+StarContract.StopTimes.CONTENT_PATH
                 +   " INNER JOIN "+StarContract.Trips.CONTENT_PATH+ " ON "+ StarContract.Trips.CONTENT_PATH+"."+StarContract.Trips.TripColumns._ID+" = "+StarContract.StopTimes.StopTimeColumns.TRIP_ID
+                +   " INNER JOIN "+StarContract.Calendar.CONTENT_PATH+ " ON "+StarContract.Trips.TripColumns.SERVICE_ID + " = "+StarContract.Calendar.CONTENT_PATH+"."+StarContract.Calendar.CalendarColumns._ID
                 +   " WHERE "+StarContract.StopTimes.StopTimeColumns.STOP_ID +" = "+stopId
                 +   " AND "+StarContract.Trips.TripColumns.ROUTE_ID +" = "+busRouteId
                 +   " AND "+StarContract.Trips.TripColumns.DIRECTION_ID + " = "+sens
+                +   " AND "+day+"="+1
+                +   " AND "+StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " > \"" + hour + "\""
                 +   " ORDER BY "+StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME;
 
         Cursor cursor = database.rawQuery(req, null);
