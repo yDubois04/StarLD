@@ -168,16 +168,34 @@ public class DataSource {
     }
 
     public Cursor getStops(String idBus, String sort) {
+
+        String headSign = getHeadSign(Integer.parseInt(idBus),Integer.parseInt(sort));
+
         String req = "SELECT DISTINCT " + StarContract.Stops.CONTENT_PATH + ".*"
                 + " FROM " + StarContract.Stops.CONTENT_PATH
                 + " INNER JOIN " + StarContract.StopTimes.CONTENT_PATH + " on " + StarContract.StopTimes.StopTimeColumns.STOP_ID + " = " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID
                 + " INNER JOIN " + StarContract.Trips.CONTENT_PATH + " on " + StarContract.Trips.CONTENT_PATH + "." + StarContract.Trips.TripColumns._ID + " = " + StarContract.StopTimes.StopTimeColumns.TRIP_ID
-                + " WHERE " + StarContract.Trips.TripColumns.ROUTE_ID + " = " + Integer.parseInt(idBus)
-                + " AND " + StarContract.Trips.TripColumns.DIRECTION_ID + " = " + Integer.parseInt(sort)
+                + " WHERE " + StarContract.Trips.TripColumns.HEADSIGN + " = \""+headSign+ "\""
+                + " AND "+StarContract.Trips.TripColumns.ROUTE_ID + " = "+idBus
+                + " AND "+StarContract.Trips.TripColumns.DIRECTION_ID + " = "+ sort
                 + " ORDER BY " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " ASC ";
 
         Cursor cursor = database.rawQuery(req, null);
         return cursor;
+    }
+
+    private String getHeadSign (int idBus, int sens) {
+        String req = "SELECT DISTINCT "+StarContract.Trips.TripColumns.HEADSIGN+", COUNT ("+StarContract.Trips.TripColumns.HEADSIGN+") AS RES"
+                + " FROM " + StarContract.Trips.CONTENT_PATH
+                + " WHERE "+StarContract.Trips.TripColumns.DIRECTION_ID +" = "+sens
+                + " AND "+StarContract.Trips.TripColumns.ROUTE_ID + " = "+idBus
+                + " GROUP BY "+StarContract.Trips.TripColumns.HEADSIGN
+                + " ORDER BY RES DESC "
+                + " LIMIT 1 ";
+
+        Cursor cursor = database.rawQuery(req, null);
+        cursor.moveToFirst();
+        return cursor.getString(0);
     }
 
     public Cursor getBusesForAStop(String nameStop) {
