@@ -57,7 +57,9 @@ public class StarProvider extends ContentProvider {
             int stopId = Integer.valueOf(selectionArgs[0]);
             int busRouteId = Integer.valueOf(selectionArgs[1]);
             int sens = Integer.valueOf(selectionArgs[2]);
-            c = dataSource.getSchedulesForAStop(stopId,busRouteId,sens);
+            String day = selectionArgs[3];
+            String hour = selectionArgs[4];
+            c = dataSource.getSchedulesForAStop(stopId,busRouteId,sens, day.toUpperCase(), hour);
         }
         return c;
     }
