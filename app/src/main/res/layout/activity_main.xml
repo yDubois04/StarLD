@@ -24,7 +24,6 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_span="5"/>
         </TableRow>
-
     </TableLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,8 @@ public interface StarContract {
 
     Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
+    String CONTENT_SEARCH = "search";
+
     interface BusRoutes {
         String CONTENT_PATH = "busroute";
         Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, CONTENT_PATH);

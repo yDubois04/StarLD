@@ -25,7 +25,7 @@ public class StarProvider extends ContentProvider {
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.Trips.CONTENT_PATH, QUERY_TRIP);
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.Stops.CONTENT_PATH, QUERY_STOPS);
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.StopTimes.CONTENT_PATH, QUERY_STIMES);
-        URI_MATCHER.addURI(StarContract.AUTHORITY,"search", QUERY_SEARCH);
+        URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.CONTENT_SEARCH, QUERY_SEARCH);
         URI_MATCHER.addURI(StarContract.AUTHORITY, StarContract.RouteDetails.CONTENT_PATH, QUERY_ROUTE_DETAILS);
     }
 

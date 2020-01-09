@@ -10,8 +10,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import fr.istic.mob.starld.StarContract;
-import fr.istic.mob.starld.model.Stop;
-
 
 public class DataSource {
 
@@ -169,27 +167,27 @@ public class DataSource {
 
     public Cursor getStops(String idBus, String sort) {
 
-        String headSign = getHeadSign(Integer.parseInt(idBus),Integer.parseInt(sort));
+        String trip = getTrip(Integer.parseInt(idBus), Integer.parseInt(sort));
 
         String req = "SELECT DISTINCT " + StarContract.Stops.CONTENT_PATH + ".*"
                 + " FROM " + StarContract.Stops.CONTENT_PATH
                 + " INNER JOIN " + StarContract.StopTimes.CONTENT_PATH + " on " + StarContract.StopTimes.StopTimeColumns.STOP_ID + " = " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID
                 + " INNER JOIN " + StarContract.Trips.CONTENT_PATH + " on " + StarContract.Trips.CONTENT_PATH + "." + StarContract.Trips.TripColumns._ID + " = " + StarContract.StopTimes.StopTimeColumns.TRIP_ID
-                + " WHERE " + StarContract.Trips.TripColumns.HEADSIGN + " = \""+headSign+ "\""
-                + " AND "+StarContract.Trips.TripColumns.ROUTE_ID + " = "+idBus
-                + " AND "+StarContract.Trips.TripColumns.DIRECTION_ID + " = "+ sort
+                + " WHERE " + StarContract.StopTimes.StopTimeColumns.TRIP_ID + " = " + trip
                 + " ORDER BY " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " ASC ";
 
         Cursor cursor = database.rawQuery(req, null);
         return cursor;
     }
 
-    private String getHeadSign (int idBus, int sens) {
-        String req = "SELECT DISTINCT "+StarContract.Trips.TripColumns.HEADSIGN+", COUNT ("+StarContract.Trips.TripColumns.HEADSIGN+") AS RES"
-                + " FROM " + StarContract.Trips.CONTENT_PATH
-                + " WHERE "+StarContract.Trips.TripColumns.DIRECTION_ID +" = "+sens
-                + " AND "+StarContract.Trips.TripColumns.ROUTE_ID + " = "+idBus
-                + " GROUP BY "+StarContract.Trips.TripColumns.HEADSIGN
+    public String getTrip(int idBus, int sens) {
+        String req = "SELECT DISTINCT " + StarContract.StopTimes.StopTimeColumns.TRIP_ID + ", COUNT (" + StarContract.StopTimes.StopTimeColumns.TRIP_ID + ") AS RES"
+                + " FROM " + StarContract.Stops.CONTENT_PATH
+                + " INNER JOIN " + StarContract.StopTimes.CONTENT_PATH + " on " + StarContract.StopTimes.StopTimeColumns.STOP_ID + " = " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID
+                + " INNER JOIN " + StarContract.Trips.CONTENT_PATH + " on " + StarContract.Trips.CONTENT_PATH + "." + StarContract.Trips.TripColumns._ID + " = " + StarContract.StopTimes.StopTimeColumns.TRIP_ID
+                + " WHERE " + StarContract.Trips.CONTENT_PATH + "." + StarContract.Trips.TripColumns.DIRECTION_ID + " = " + sens
+                + " AND " + StarContract.Trips.TripColumns.ROUTE_ID + " = " + idBus
+                + " GROUP BY " + StarContract.StopTimes.StopTimeColumns.TRIP_ID
                 + " ORDER BY RES DESC "
                 + " LIMIT 1 ";
 
@@ -214,7 +212,7 @@ public class DataSource {
 
     public Cursor getSchedules(String schedule, int tripId) {
 
-        String req = "SELECT DISTINCT " + StarContract.Stops.CONTENT_PATH+"."+StarContract.Stops.StopColumns._ID+","+StarContract.Stops.StopColumns.NAME + " , " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME
+        String req = "SELECT DISTINCT " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID + "," + StarContract.Stops.StopColumns.NAME + " , " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME
                 + " FROM " + StarContract.Stops.CONTENT_PATH
                 + " INNER JOIN " + StarContract.StopTimes.CONTENT_PATH + " ON " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID + " = " + StarContract.StopTimes.StopTimeColumns.STOP_ID
                 + " WHERE " + StarContract.StopTimes.StopTimeColumns.TRIP_ID + " = " + tripId
@@ -225,18 +223,18 @@ public class DataSource {
         return cursor;
     }
 
-    public Cursor getSchedulesForAStop (int stopId, int busRouteId, int sens, String day, String hour) {
+    public Cursor getSchedulesForAStop(int stopId, int busRouteId, int sens, String day, String hour) {
 
-        String req = "SELECT "+StarContract.StopTimes.CONTENT_PATH+".*"
-                +   " FROM "+StarContract.StopTimes.CONTENT_PATH
-                +   " INNER JOIN "+StarContract.Trips.CONTENT_PATH+ " ON "+ StarContract.Trips.CONTENT_PATH+"."+StarContract.Trips.TripColumns._ID+" = "+StarContract.StopTimes.StopTimeColumns.TRIP_ID
-                +   " INNER JOIN "+StarContract.Calendar.CONTENT_PATH+ " ON "+StarContract.Trips.TripColumns.SERVICE_ID + " = "+StarContract.Calendar.CONTENT_PATH+"."+StarContract.Calendar.CalendarColumns._ID
-                +   " WHERE "+StarContract.StopTimes.StopTimeColumns.STOP_ID +" = "+stopId
-                +   " AND "+StarContract.Trips.TripColumns.ROUTE_ID +" = "+busRouteId
-                +   " AND "+StarContract.Trips.TripColumns.DIRECTION_ID + " = "+sens
-                +   " AND "+day+"="+1
-                +   " AND "+StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " > \"" + hour + "\""
-                +   " ORDER BY "+StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME;
+        String req = "SELECT " + StarContract.StopTimes.CONTENT_PATH + ".*"
+                + " FROM " + StarContract.StopTimes.CONTENT_PATH
+                + " INNER JOIN " + StarContract.Trips.CONTENT_PATH + " ON " + StarContract.Trips.CONTENT_PATH + "." + StarContract.Trips.TripColumns._ID + " = " + StarContract.StopTimes.StopTimeColumns.TRIP_ID
+                + " INNER JOIN " + StarContract.Calendar.CONTENT_PATH + " ON " + StarContract.Trips.TripColumns.SERVICE_ID + " = " + StarContract.Calendar.CONTENT_PATH + "." + StarContract.Calendar.CalendarColumns._ID
+                + " WHERE " + StarContract.StopTimes.StopTimeColumns.STOP_ID + " = " + stopId
+                + " AND " + StarContract.Trips.TripColumns.ROUTE_ID + " = " + busRouteId
+                + " AND " + StarContract.Trips.TripColumns.DIRECTION_ID + " = " + sens
+                + " AND " + day + "=" + 1
+                + " AND " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME + " > \"" + hour + "\""
+                + " ORDER BY " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME;
 
         Cursor cursor = database.rawQuery(req, null);
         return cursor;

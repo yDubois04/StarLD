@@ -5,24 +5,18 @@ import androidx.work.Constraints;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import fr.istic.mob.starld.database.DataSource;
-
-import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.Context;
-import android.database.Cursor;
-import android.icu.text.UnicodeSetSpanner;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -112,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     class AsyncTaskCreateBD extends AsyncTask <Void, Integer, String> {
 
         @Override
-        protected String doInBackground(Void... voids) {
+        protected String doInBackground(Void ... voids) {
             dataSource.clearDatabase();
             int count = 5;
             publishProgress(count);
@@ -136,19 +130,26 @@ public class MainActivity extends AppCompatActivity {
             count = 80;
             publishProgress(count);
             dataSource.initializeTable("stop_times.txt", StarContract.StopTimes.CONTENT_PATH);
+            count = 100;
+            publishProgress(count);
 
             return (getString(R.string.toast_download));
         }
 
         @Override
         protected void onProgressUpdate (Integer... diff) {
-            progressBar.incrementProgressBy(diff [0]);
+            progressBar.setProgress(diff[0]);
         }
 
         @Override
         protected void onPostExecute (String message) {
-            Toast.makeText(getApplicationContext(),message, Toast.LENGTH_SHORT).show();
-            progressBar.incrementProgressBy(100);
+            Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
+            finish();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setProgress(0);
         }
     }
 }
