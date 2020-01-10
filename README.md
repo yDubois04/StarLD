@@ -1,23 +1,12 @@
 # StarLD
 
-Notre application permet de :
-
-- Choisir une date et une heure en cliquant sur le textView prévu à cet effet
-- Choisir une ligne de bus en cliquant sur le premier spinner
-- Choisir un terminal correspondant à la ligne de bus précedemment choisie, en cliquant sur le deuxième spinner
-
 Lorsque l'on installe l'application, la base de données est remplie grâce au fichier zip récupérée sur le site de la Star.
 Ensuite, toutes les 15 minutes un service vérifiera qu'il n'y a pas de nouvelles données à télécharger. 
-Si c'est le cas une notification apparaitra, permettant ainsi à l'utilisateur de télécharger les nouvelles données 
-en cliquant sur la notification.
+Si c'est le cas une notification apparaitra, permettant ainsi à l'utilisateur de télécharger les nouvelles données en cliquant sur la notification.
+
+Lorsque la base de données se remplit, son remplissage est suivi avec une progress bar. Lorsque la base de données est remplie, l'application se ferme.
 
 
 # Problèmes connus
 
-Pour le moment, quelques problèmes n'ont pas encore été résolus :
-
-- Lors du premier lancement de l'application, comme l'installation de la base de données n'est pas instantanée, l'application va envoyer une notification malgré le fait que le processus pour remplir la base de données soit commencé.
-- Lors du remplissage de la base de données, l'écran est blanc car l'application est en cours de traitement, il se peut que le téléphone pense que l'application est crashée, mais ce n'est pas le cas, il faut attendre quelques minutes (5 maximum)
-- Une fois les spinners remplis, lorsque l'on relance l'application, les spinners n'apparaissent pas automatiquement
-
-Ces problèmes seront traités pour la V2.
+Le download manager ne marche que pour les API d'Androïd inférieure à l'API 28
