@@ -4,7 +4,7 @@ Lorsque l'on installe l'application, la base de données est remplie grâce au f
 Ensuite, toutes les 15 minutes un service vérifiera qu'il n'y a pas de nouvelles données à télécharger. 
 Si c'est le cas une notification apparaitra, permettant ainsi à l'utilisateur de télécharger les nouvelles données en cliquant sur la notification.
 
-Lorsque la base de données se remplit, son remplissage est suivi avec une bar de progression. Lorsque la base de données est remplie, l'application se ferme.
+Lorsque la base de données se remplit, son remplissage est suivi avec une barre de progression. Lorsque la base de données est remplie, l'application se ferme.
 
 
 # Problèmes connus
