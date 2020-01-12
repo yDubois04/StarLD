@@ -135,14 +135,15 @@ public class DownloadWorker extends Worker {
         if(!url.equals("")){
             saveStringInMemory("currentURL.txt", url);
         }
-
-        System.out.println("URL ::::: " + url);
-        System.out.println("CurrentURL ::::: " + getStringSaved("currentURL.txt"));
-
         // Indicate whether the task finished successfully with the Result
         return Result.success();
     }
 
+    /**
+     * Save json in a file
+     * @param fileName
+     * @param JSONToSave
+     */
     private void saveStringInMemory (String fileName, String JSONToSave) {
         FileOutputStream outputStream = null;
         ObjectOutputStream objectOutputStream = null;
@@ -160,6 +161,11 @@ public class DownloadWorker extends Worker {
         }
     }
 
+    /**
+     *
+     * @param fileName
+     * @return the content of a file
+     */
     private String getStringSaved(String fileName){
         String result = "";
 
@@ -175,6 +181,10 @@ public class DownloadWorker extends Worker {
         return result;
     }
 
+    /**
+     *
+     * @return a json for star url
+     */
     private String getJsonFromUrl(){
         String urlString = "https://data.explore.star.fr/api/records/1.0/search/?dataset=tco-busmetro-horaires-gtfs-versions-td";
         URL url;
@@ -217,6 +227,9 @@ public class DownloadWorker extends Worker {
         }
     }
 
+    /**
+     * Display notification to fill database
+     */
     private void createNotification () {
 
         Intent downloadIntent = new Intent(getApplicationContext(), MainActivity.class);

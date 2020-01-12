@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarDownload);
         progressBar.setMax(100);
 
+        //Create service
         Constraints constraints = new Constraints.Builder().build();
         PeriodicWorkRequest downloadRequest =
                 new PeriodicWorkRequest.Builder(DownloadWorker.class, 1, TimeUnit.DAYS)
@@ -43,21 +44,24 @@ public class MainActivity extends AppCompatActivity {
         WorkManager.getInstance(getApplicationContext())
                 .enqueue(downloadRequest);
 
-        dataSource = new DataSource(getApplicationContext());
-        dataSource.open();
-
+        //Start file download and create the database
         if(getIntent().getExtras() != null) {
             url = getIntent().getExtras().getString("url");
-            System.out.println("URL in Main Activity : " + url);
             if (url != null && url != "") {
                 startDownload();
             }
             else if(getIntent().getExtras().getBoolean("DLComplete")){
                 unzip();
+                dataSource = new DataSource(getApplicationContext());
+                dataSource.open();
                 new AsyncTaskCreateBD().execute();
             }
         }
     }
+
+    /**
+     * Download data from an uri
+     */
     public void startDownload(){
         Uri uri = Uri.parse(url);
 
@@ -71,6 +75,9 @@ public class MainActivity extends AppCompatActivity {
         manager.enqueue(request);
     }
 
+    /**
+     * Unzip files
+     */
     public void unzip(){
         byte[] buffer = new byte[1024];
 
@@ -103,6 +110,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Async task which creates the database
+     */
     class AsyncTaskCreateBD extends AsyncTask <Void, Integer, String> {
 
         @Override

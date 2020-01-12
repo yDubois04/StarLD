@@ -53,6 +53,11 @@ public class DataSource {
         database.execSQL("DELETE FROM " + StarContract.Calendar.CONTENT_PATH);
     }
 
+    /**
+     * Initializes database table from a file
+     * @param fileName
+     * @param nameTable
+     */
     public void initializeTable(String fileName, String nameTable) {
         File file = new File(dowloadFolder, fileName);
 
@@ -123,6 +128,11 @@ public class DataSource {
     }
 
 
+    /**
+     * Get creation request for a table in the database
+     * @param tableName
+     * @return
+     */
     private String getInsertRequete(String tableName) {
         String requete = "";
 
@@ -159,12 +169,22 @@ public class DataSource {
         return requete;
     }
 
+    /**
+     *
+     * @return a cursor which contains all buses
+     */
     public Cursor getBuses() {
         String req = "SELECT * FROM " + StarContract.BusRoutes.CONTENT_PATH;
         Cursor cursor = database.rawQuery(req, null);
         return cursor;
     }
 
+    /**
+     *
+     * @param idBus
+     * @param sort
+     * @return a cursor which contains stops for a bus and a direction
+     */
     public Cursor getStops(String idBus, String sort) {
 
         String trip = getTrip(Integer.parseInt(idBus), Integer.parseInt(sort));
@@ -180,7 +200,13 @@ public class DataSource {
         return cursor;
     }
 
-    public String getTrip(int idBus, int sens) {
+    /**
+     *
+     * @param idBus
+     * @param sens
+     * @return  the id of a trip which have the most stops
+     */
+    private String getTrip(int idBus, int sens) {
         String req = "SELECT DISTINCT " + StarContract.StopTimes.StopTimeColumns.TRIP_ID + ", COUNT (" + StarContract.StopTimes.StopTimeColumns.TRIP_ID + ") AS RES"
                 + " FROM " + StarContract.Stops.CONTENT_PATH
                 + " INNER JOIN " + StarContract.StopTimes.CONTENT_PATH + " on " + StarContract.StopTimes.StopTimeColumns.STOP_ID + " = " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID
@@ -196,6 +222,11 @@ public class DataSource {
         return cursor.getString(0);
     }
 
+    /**
+     *
+     * @param nameStop
+     * @return a cursor which contains all buses which pass by a stop
+     */
     public Cursor getBusesForAStop(String nameStop) {
 
         String req = "SELECT DISTINCT " + StarContract.BusRoutes.CONTENT_PATH + ".*, " + StarContract.Stops.StopColumns.NAME
@@ -210,6 +241,12 @@ public class DataSource {
         return cursor;
     }
 
+    /**
+     *
+     * @param schedule
+     * @param tripId
+     * @return a cursor which contains the arrival time and the names of the stops from a certain arrival time and trip
+     */
     public Cursor getSchedules(String schedule, int tripId) {
 
         String req = "SELECT DISTINCT " + StarContract.Stops.CONTENT_PATH + "." + StarContract.Stops.StopColumns._ID + "," + StarContract.Stops.StopColumns.NAME + " , " + StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME
@@ -223,6 +260,15 @@ public class DataSource {
         return cursor;
     }
 
+    /**
+     *
+     * @param stopId
+     * @param busRouteId
+     * @param sens
+     * @param day
+     * @param hour
+     * @return a cursor which contains arrival time for a certain stop
+     */
     public Cursor getSchedulesForAStop(int stopId, int busRouteId, int sens, String day, String hour) {
 
         String req = "SELECT " + StarContract.StopTimes.CONTENT_PATH + ".*"
