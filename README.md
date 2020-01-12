@@ -7,6 +7,6 @@ Si c'est le cas une notification apparaitra, permettant ainsi à l'utilisateur d
 Lorsque la base de données se remplit, son remplissage est suivi avec une barre de progression. Lorsque la base de données est remplie, l'application se ferme.
 
 
-# Problèmes connus
+# Problème connu
 
 Le download manager ne marche que pour les API d'Androïd inférieure à l'API 28
